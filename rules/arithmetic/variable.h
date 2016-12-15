@@ -5,13 +5,20 @@
 
 #include "rules/arithmetic/arithmeticoperable.h"
 
-class Variable : public ArithmeticOperable
+#include "fluidicmachinemodel_global.h"
+
+class VARIABLE_EXPORT Variable : public ArithmeticOperable
 {
 public:
     Variable(const std::string & name);
     virtual ~Variable();
 
-    virtual std::string translate();
+    virtual void fillTranslationStack(TranslationStack* stack);
+
+    inline std::string getName() {
+        return name;
+    }
+
 protected:
     std::string name;
 };

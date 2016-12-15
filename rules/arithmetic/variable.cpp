@@ -10,6 +10,6 @@ Variable::~Variable() {
 
 }
 
-std::string Variable::translate() {
-    return name;
+void Variable::fillTranslationStack(TranslationStack* stack) {
+    stack->stackVariable(name);
 }
