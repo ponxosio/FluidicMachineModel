@@ -1,7 +1,7 @@
 #ifndef RULE_H
 #define RULE_H
 
-#include "rules/translationstack.h"
+#include "constraintssolverinterface/translationstack.h"
 
 class Rule
 {

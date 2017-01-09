@@ -3,9 +3,14 @@
 
 # include <string>
 
+#include "constraintssolverinterface/routingengine.h"
+
 class TranslationStack {
 public:
+    TranslationStack() {}
     virtual ~TranslationStack(){}
+
+    virtual RoutingEngine* getRoutingEngine() = 0;
 
     virtual void pop() = 0;
     virtual void clear() = 0;
