@@ -33,7 +33,9 @@ SOURCES += fluidicmachinemodel.cpp \
     fluidicnode/functions/lightfunction.cpp \
     fluidicnode/functions/stirfunction.cpp \
     fluidicnode/containernode.cpp \
-    machinestate.cpp
+    machinestate.cpp \
+    flowvolumeengine.cpp \
+    machineflow.cpp
 
 HEADERS += fluidicmachinemodel.h\
         fluidicmachinemodel_global.h \
@@ -74,7 +76,8 @@ HEADERS += fluidicmachinemodel.h\
     fluidicnode/functions/stirfunction.h \
     fluidicnode/containernode.h \
     constraintssolverinterface/routingengine.h \
-    machinestate.h
+    machinestate.h \
+    machineflow.h
 
 unix {
     target.path = /usr/lib

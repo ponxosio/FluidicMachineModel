@@ -17,45 +17,39 @@ class MachineState
 {
 public:
     MachineState();
-    MachineState(const std::vector<std::tuple<std::string, int>> & states);
+    MachineState(const std::unordered_map<std::string, long long> & states) throw (std::invalid_argument);
     virtual ~MachineState();
 
-    std::vector<std::tuple<std::string, int>> getAllValues();
-    std::vector<std::tuple<std::string, int>> getALLContainersTubes();
-    void setAllStates(const std::vector<std::tuple<std::string, int>> & states);
+    std::unordered_map<std::string, long long> getAllValues();
+    std::unordered_map<std::string, long long> getAllContainersTubes();
+    void setAllStates(const std::vector<std::tuple<std::string, long long>> & states) throw (std::invalid_argument);
 
-    int getContainer(int id) throw(std::invalid_argument);
-    void setContainer(int id, int state);
-    const std::vector<std::tuple<std::string, int>> & getAllContainersVar();
-    std::vector<std::tuple<int, int>> getAllContainers();
+    int getContainerId(const std::string & containerNameVar) throw(std::invalid_argument);
+    long long getContainerState(int id) throw(std::invalid_argument);
+    void setContainerState(int id, long long state) throw(std::invalid_argument);
+    const std::unordered_map<std::string, long long> & getAllContainersVar();
 
-    int getValve(int id) throw(std::invalid_argument);
-    void setValve(int id, int state);
-    const std::vector<std::tuple<std::string, int>> & getAllValvesVar();
-    std::vector<std::tuple<int, int>> getAllValves();
+    std::tuple<int,int> getTubeId(const std::string & tubeNameVar) throw(std::invalid_argument);
+    long long getTubeState(int idSource, int idTarget) throw(std::invalid_argument);
+    void setTubeState(int idSource, int idTarget, long long state);
+    const std::unordered_map<std::string, long long> & getAllTubes();
 
-    int getTube(int idSource, int idTarget) throw(std::invalid_argument);
-    void setContainer(int idSource, int idTarget, int state);
-    const std::vector<std::tuple<std::string, int>> & getAllTubesVar();
-    std::vector<std::tuple<int, int>> getAllTubes();
+    int getPumpId(const std::string & pumpVarName) throw(std::invalid_argument);
+    long long getPumpDir(int id) throw (std::invalid_argument);
+    long long getPumpRate(int id) throw (std::invalid_argument);
+    const std::unordered_map<std::string, long long> & getAllPumpsDirVar();
+    const std::unordered_map<std::string, long long> & getAllPumpsRateVar();
 
-    int getPump(int id) throw(std::invalid_argument);
-    void setPump(int id, int state);
-    const std::vector<std::tuple<std::string, int>> & getAllPumpsVar();
-    std::vector<std::tuple<int, std::tuple<int, double>>> getAllPumps();
-
-    double getPumpRate(int id) throw(std::invalid_argument);
-    void setPumpRate(int id, double rate);
-    const std::vector<std::tuple<std::string, double>> & getAllPumpRatesVar();
-
-    MachineState getDifferences(const MachineState & otherState);
+    int getValveId(const std::string & valveVarname) throw(std::invalid_argument);
+    long long getValvePosition(int id);
+    const std::unordered_map<std::string, long long> & getAllValves();
 
 protected:
-    std::vector<std::tuple<std::string, int>> containers;
-    std::vector<std::tuple<std::string, int>> valves;
-    std::vector<std::tuple<std::string, int>> tubes;
-    std::vector<std::tuple<std::string, int>> pumps;
-    std::unordered_map<std::string, double> pumpsRate;
+    std::unordered_map<std::string, long long> containersMap;
+    std::unordered_map<std::string, long long> tubesMap;
+    std::unordered_map<std::string, long long> valvesMap;
+    std::unordered_map<std::string, long long> pumpsMap;
+    std::unordered_map<std::string, long long> pumpsRatesMap;
 };
 
 #endif // MACHINESTATE_H

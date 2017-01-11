@@ -1,109 +1,77 @@
 #include "fluidicmachinemodel.h"
 
-
-FluidicMachineModel::FluidicMachineModel(MachineGraph graph, std::shared_ptr<TranslationStack> translationStack) {
+FluidicMachineModel::FluidicMachineModel(MachineGraph graph,
+                                         std::shared_ptr<TranslationStack> translationStack,
+                                         short int ratePrecisionInteger,
+                                         short int ratePrecisionDecimal)
+{
+    this->ratePrecisionDecimal = ratePrecisionDecimal;
+    this->ratePrecisionInteger = ratePrecisionInteger;
     this->graph = graph;
     this->translationStack = translationStack;
-    createRules();
+
+    analizeGraph();
 }
 
 FluidicMachineModel::~FluidicMachineModel() {
 
 }
 
-void FluidicMachineModel::loadContainer(int id, double volume) throw(std::invalid_argument) {
-    std::string varName = "C" + std::to_string(id);
-
-    auto it = containerStatusMap.find(varName);
-    if (it != containerStatusMap.end()) {
-        it->second = pow(2,(id+1));
-        std::shared_ptr<ContainerNode> node = std::dynamic_pointer_cast<ContainerNode>(graph->getNode(id));
-        if (node) {
-            node->setActualVolume(volume);
+void FluidicMachineModel::loadContainer(short int id, float volume) throw(std::invalid_argument) {
+    auto finded = idOpenContainerLiquidIdMap.find(id);
+    if (finded != idOpenContainerLiquidIdMap.end()) {
+        std::shared_ptr<ContainerNode> openContainer = std::dynamic_pointer_cast<ContainerNode>(graph->getNode(id));
+        if (openContainer) {
+            short int liquid_id = finded.second;
+            containersTubesInterfaceState.setContainerState(id, std::pow(2, liquid_id));
+            actualFullMachineState.setContainerState(id, std::pow(2, liquid_id));
+            openContainer->setActualVolume(volume);
         } else {
-            throw(std::invalid_argument("error getting " + std::to_string(id) + " node, id does not exists"));
+            throw(std::invalid_argument("error casting node " + std::to_string(id) + ", possible inconsistency in open_container table."));
         }
     } else {
-        throw(std::invalid_argument(std::to_string(id) + ", does not exists as a container"));
+        throw(std::invalid_argument(std::to_string(id) + " is not an open container"));
     }
 }
 
-void FluidicMachineModel::setContinuousFlow(int idSource, int idTarget, double flowRate) {
-    std::string varCSource = "C" + std::to_string(idSource);
-    std::string varCTarget = "C" + std::to_string(idTarget);
+void FluidicMachineModel::setContinuousFlow(short int idStart, short int idEnd, float flowRate,
+                                            const std::vector<short int> * intermediateContainers,
+                                            const std::vector<std::tuple<short int, short int, bool>> * intermediateTubes) throw(std::invalid_argument)
+{
+    auto itIdLiquidStart = idOpenContainerLiquidIdMap.find(idStart);
+    if (itIdLiquidStart != idOpenContainerLiquidIdMap.end()) {
+        auto itIdLiquidEnd = idOpenContainerLiquidIdMap.find(idStart);
+        if (itIdLiquidEnd != idOpenContainerLiquidIdMap.end()) {
+            try {
+                short int flowRateInt = transformRateToInt(flowRate);
+                short int idLiquidStart = * itIdLiquidStart;
+                short int idLiquidEnd = * itIdLiquidEnd;
+                long long startState = -(std::pow(10, ratePrecisionDecimal + ratePrecisionInteger) * idLiquidStart + flowRateInt);
 
-    auto itSource = containerStatusMap.find(varCSource);
-    if (itSource != containerStatusMap.end()) {
-        if (*itSource->second != UNDEFINE_VAR_STATUS) {
-            auto itTarget = containerStatusMap.find(varCTarget);
-            if (itTarget != containerStatusMap.end()) {
-                itTarget->second += itSource->second;
+                addToContainersState(idEnd,-startState);
 
-                std::vector<std::tuple<std::string, int>> newStates;
-                if (calculateNewRoute(newStates)) {
-                    setNewMachineState(newStates, flowRate);
-                } else {
-                    throw(std::invalid_argument("imposible to route"));
+                if (intermediateContainers) {
+                    for (short int idContainer: *intermediateContainers) {
+                        addToContainersState(idContainer, -startState);
+                    }
                 }
-            } else {
-                throw(std::invalid_argument(std::to_string(idTarget) + ", does not exists as a container"));
+
+                if (intermediateTubes) {
+                    for(std::tuple<short int, short int, bool> tubeId: *intermediateTubes) {
+                        int dir = std::get<2>(tubeId) ? -1 : 1;
+                        addToTubeState(std::get<0>(tubeId), std::get<1>(tubeId), dir * startState);
+                    }
+                }
+
+
+            } catch (std::invalid_argument & e) {
+                throw(std::invalid_argument("error while setting flow between, " + std::to_string(idSource) + "_" + std::to_string(idTarget) +
+                                            ". Error message: " + e.what()));
             }
         } else {
-            throw(std::invalid_argument(std::to_string(idSource) + ", does not has any liquid"));
+            throw (std::invalid_argument(std::to_string(idEnd) +  " is not an open container"));
         }
     } else {
-        throw(std::invalid_argument(std::to_string(idSource) + ", does not exists as a container"));
+        throw (std::invalid_argument(std::to_string(idStart) +  " is not an open container"));
     }
-}
-
-void FluidicMachineModel::stopContinuousFlow(int idSource, int idTarget) {
-    std::string varCSource = "C" + std::to_string(idSource);
-    std::string varCTarget = "C" + std::to_string(idTarget);
-
-    auto itTarget = containerStatusMap.find(varCSource);
-    auto itSource = containerStatusMap.find(varCTarget);
-
-    if (itSource != containerStatusMap.end()) {
-        if (itTarget != containerStatusMap.end()) {
-            if (((*itSource->second) != UNDEFINE_VAR_STATUS) &&
-                    ((*itTarget->second) != UNDEFINE_VAR_STATUS))
-            {
-                unsigned int sourceFlag = (unsigned int) *itSource->second;
-                unsigned int targetFlag = (unsigned int) *itTarget->second;
-                if ((sourceFlag & targetFlag) == sourceFlag) {
-                    itTarget->second -= itSource->second;
-                    if (itTarget->second == 0) {
-                        itTarget = -1;
-                    }
-
-                    std::vector<std::tuple<std::string, int>> newStates;
-                    if (calculateNewRoute(newStates)) {
-                        setNewMachineState(newStates, 0.0);
-                    } else {
-                        throw(std::invalid_argument("imposible to route"));
-                    }
-                } else {
-                    throw(std::invalid_argument("there is not a flow between "  +  std::to_string(idSource) + "->" + std::to_string(idTarget)));
-                }
-            } else {
-                throw(std::invalid_argument("some container is empty"));
-            }
-        } else {
-            throw(std::invalid_argument(std::to_string(idTarget) + ", does not exists as a container"));
-        }
-    } else {
-        throw(std::invalid_argument(std::to_string(idSource) + ", does not exists as a container"));
-    }
-}
-
-void FluidicMachineModel::setTubeFlow(int edgeIdSource, int edgeIdTarget, double flowRate) {
-
-}
-
-void FluidicMachineModel::setTranslationStack(std::shared_ptr<TranslationStack> translationStack) {
-
-}
-
-void FluidicMachineModel::updatePluginFactory(std::shared_ptr<PluginAbstractFactory> factory) {
-
 }

@@ -98,3 +98,7 @@ size_t Utils::cantorParingFunction(int k1, int k2) {
 size_t Utils::cantorParingFunction(long k1, long k2) {
     return (0.5 * (k1 + k2) * (k1 + k2 + 1)) + k2;
 }
+
+size_t Utils::cantorParingFunction(short int k1, short int k2) {
+    return (0.5 * (k1 + k2) * (k1 + k2 + 1)) + k2;
+}

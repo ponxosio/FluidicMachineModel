@@ -78,6 +78,7 @@ public:
     static size_t strToSizeT(const std::string & str) throw(std::invalid_argument);
 
     static size_t cantorParingFunction(int k1, int k2);
+    static size_t cantorParingFunction(short int k1, short int k2);
     static size_t cantorParingFunction(long k1, long k2);
 private:
 	Utils();
@@ -92,6 +93,15 @@ typedef struct {
         return Utils::cantorParingFunction(k1, k2);
     }
 } PairIntIntHashFunction;
+
+typedef struct {
+    //cantor paring function
+    size_t operator()(std::tuple<short int, short int> x) const throw () {
+        short int k1 = std::get<0>(x);
+        short int k2 = std::get<1>(x);
+        return Utils::cantorParingFunction(k1, k2);
+    }
+} PairShortIntIntHashFunction;
 
 typedef struct {
     //cantor paring function
