@@ -20,7 +20,7 @@ public:
     void connectToPin(int pin, std::shared_ptr<TubeEdge> edge) throw (std::invalid_argument);
 
     bool canDoOperations(unsigned long mask);
-    double doOperation(OperationType op, int nargs, va_list args) throw (std::invalid_argument);
+    double doOperation(OperationType op, int nargs, ...) throw (std::invalid_argument);
     double getMinVolume(OperationType op) throw (std::invalid_argument);
 
     const FunctionSet getAvailableFunctions();

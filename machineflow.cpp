@@ -20,7 +20,6 @@ void MachineFlow::addFlow(short int idSource, short int idTarget, float rate) {
         tempPath.push_back(idTarget);
         actual.push_back(std::make_tuple(tempPath, rate));
     }
-    mergeStacks();
 }
 
 void MachineFlow::removeFlow(short int idSource, short int idTarget) {
@@ -28,7 +27,22 @@ void MachineFlow::removeFlow(short int idSource, short int idTarget) {
 }
 
 const MachineFlow::FlowsVector & MachineFlow::updateFlows() {
-
+    mergeStacks();
+    for(auto it_actual = actual.begin(); it_actual != actual.end(); ++it_actual) {
+        bool compatible = false;
+        for (auto it_previous = previous.begin(); it_previous != previous.end(); ++it_previous) {
+            if (areCompatible(std::get<0>(*it_actual), std::get<0>(*it_previous))) {
+                compatible = true;
+                std::get<1>(*it_previous) = std::get<1>(*it_asctual);
+            }
+        }
+        if (!compatible) {
+            previous.push_back(std::make_tuple(std::get<0>(*it_actual), std::get<1>(*it_actual)));
+        }
+    }
+    actual.clear();
+    removeZeroFlows(previous);
+    return previous;
 }
 
 bool MachineFlow::tryAppend(PathRateTuple & tuple, short int idSource, short int idTarget, float rate) {
@@ -69,21 +83,30 @@ void MachineFlow::removeZeroFlows(FlowsVector & flows) {
 }
 
 void MachineFlow::mergeStacks() {
-    FlowsVector temp;
-    for(auto it_i = actual.begin(); it_i != actual.end(); ++ it_i) {
-        for (auto it_j = actual.begin(); it_j != actual.end(); ++ it_j) {
-            if (it_i != it_j &&
-                std::get<1>(*it_i) == std::get<1>(*it_j) &&
-                std::get<0>(*it_i).back() == std::get<0>(*it_j).front())
-            {
-                std::deque<short int> newQueue(std::get<0>(*it_i));
-                newQueue.insert(newQueue.begin(), std::get<0>(*it_j).begin(), std::get<0>(*it_j).end());
-                temp.push_back(std::make_tuple(newQueue, std::get<1>(*it_i)));
+    bool changes = false;
+    do {
+        for(auto it_i = actual.begin(); it_i != actual.end(); ) {
+            for (auto it_j = it_i + 1; it_j != actual.end(); ++ it_j) {
+                double rate_i = std::get<1>(*it_i);
+                double rate_j = std::get<1>(*it_j);
+                if (rate_i == rate_j) {
+                    std::deque<short int> stack_i = std::get<0>(*it_i);
+                    std::deque<short int> stack_j = std::get<0>(*it_j);
+                    if (stack_i.front() == stack_j.back()) {
+                        changes = true;
+                        stack_j.insert(stack_j.back(),stack_i.begin() + 1, stack_i.end());
+                    } else if (stack_i.back() == stack_j.front()) {
+                        changes = true;
+                        stack_j.insert(stack_j.begin(),stack_i.begin(), stack_i.end() - 1);
+                    }
+                }
+            }
+
+            if (changes) {
+                it_i = actual.erase(it_i);
             } else {
-                temp.push_back(*it_i);
-                temp.push_back(*it_j);
+                ++it_i;
             }
         }
-    }
-    actual = temp;
+    } while(changes);
 }

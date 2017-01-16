@@ -89,14 +89,25 @@ long long MachineState::getContainerState(int id) throw(std::invalid_argument) {
     }
 }
 
-void MachineState::setContainerState(int id, long long state) throw(std::invalid_argument) {
+void MachineState::overrideContainerState(int id, long long state) throw(std::invalid_argument) {
     std::string varName = "C_" + std::to_string(id);
     auto it = containersMap.find(varName);
 
-    if (it != containersMap.end()) {
+    if (it == containersMap.end()) {
         containersMap.insert(std::make_pair(varName, state));
     } else {
         it->second = state;
+    }
+}
+
+void MachineState::addContainerState(int id, long long state) throw(std::invalid_argument) {
+    std::string varName = "C_" + std::to_string(id);
+    auto it = containersMap.find(varName);
+
+    if (it == containersMap.end()) {
+        containersMap.insert(std::make_pair(varName, state));
+    } else {
+        it->second = addStates(state, it->second);
     }
 }
 
@@ -133,11 +144,22 @@ long long MachineState::getTubeState(int idSource, int idTarget) throw(std::inva
     }
 }
 
-void MachineState::setTubeState(int idSource, int idTarget, long long state) {
+void MachineState::addTubeState(int idSource, int idTarget, long long state) {
     std::string varName = "T_" + std::to_string(idSource) + "_" + std::to_string(idTarget);
     auto it = tubesMap.find(varName);
 
-    if (it != tubesMap.end()) {
+    if (it == tubesMap.end()) {
+        tubesMap.insert(varName, state);
+    } else {
+        it->second = addStates(state, it->second);
+    }
+}
+
+void MachineState::overrideTubeState(int idSource, int idTarget, long long state) {
+    std::string varName = "T_" + std::to_string(idSource) + "_" + std::to_string(idTarget);
+    auto it = tubesMap.find(varName);
+
+    if (it == tubesMap.end()) {
         tubesMap.insert(varName, state);
     } else {
         it->second = state;
@@ -174,13 +196,13 @@ long long MachineState::getPumpDir(int id) throw (std::invalid_argument) {
     }
 }
 
-long long MachineState::getPumpRate(int id) throw (std::invalid_argument) {
+float MachineState::getPumpRate(int id) throw (std::invalid_argument) {
     std::string varName = "R_" + std::to_string(id);
     auto it = pumpsRatesMap.find(varName);
 
     if (it != pumpsRatesMap.end()) {
         long long cState = it->second;
-        return cState;
+        return rateToFloat(cState);
     } else {
         throw(std::invalid_argument(std::to_string(id) + " is not present or is not a pump's rate"));
     }
@@ -222,4 +244,46 @@ long long MachineState::getValvePosition(int id) {
 
 const std::unordered_map<std::string, long long> & MachineState::getAllValves() {
     return valvesMap;
+}
+
+long long MachineState::addStates(long long state1, long long state2) throw(std::invalid_argument) {
+    long long rate1 = getRate(state1);
+    if (rate1 == getRate(state2)) {
+        long long id1 = getId(state1);
+        long long id2 = getId(state2);
+        return generateState(id1 + id2, rate1);
+    } else {
+        throw(std::invalid_argument("imposible to add " + std::to_string(state1) + " and " + std::to_string(state2) + ", to add two states their rates must be the same" ));
+    }
+}
+
+long long MachineState::rateToInt(float rate) throw (std::overflow_error) {
+    float maxRate = pow(10, ratePrecisionDecimal + ratePrecisionInteger) - 1.0;
+    if (rate < maxRate) {
+        long integer = truncf(rate);
+        long decimal = roundf((rate - integer) * pow(10, ratePrecisionDecimal));
+        return (integer*pow(10, ratePrecisionDecimal + 1) + decimal);
+    } else {
+        throw(std::overflow_error(std::to_string(rate) + " is too big, max value " + std::to_string(maxRate)));
+    }
+}
+
+float MachineState::rateToFloat(long long rate) {
+    float integer = trunc(rate/pow(10, ratePrecisionDecimal));
+    float decimal = rate % pow(10, ratePrecisionDecimal);
+    return integer + decimal;
+}
+
+long long MachineState::generateState(int liquidId, float rate) throw(std::overflow_error) {
+    int maxId = pow(10,LONG_LONG_DIGITS_SIZE - (ratePrecisionDecimal + ratePrecisionInteger)) - 1.0;
+    try {
+        long long intRate = rateToInt(rate);
+        if (liquidId < maxId) {
+            return (liquidId * pow(10, ratePrecisionDecimal + ratePrecisionInteger) + intRate);
+        } else {
+            throw(std::overflow_error( std::to_string(liquidId) + " is too big, max id " + std::to_string(maxId)));
+        }
+    } catch (std::overflow_error & e) {
+        throw(std::overflow_error("generateState: " + e.what()));
+    }
 }

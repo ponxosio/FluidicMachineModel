@@ -27,7 +27,7 @@ protected:
 
     bool tryAppend(PathRateTuple & tuple, short int idSource, short int idTarget, float rate);
     bool areCompatible(const std::deque<short int> & queue1, const std::deque<short int> & queue2);
-    void removeZeroFlows();
+    void removeZeroFlows(FlowsVector & flows);
     void mergeStacks();
 };
 

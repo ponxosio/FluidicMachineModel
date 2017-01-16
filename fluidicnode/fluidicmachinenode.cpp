@@ -48,9 +48,13 @@ bool FluidicMachineNode::canDoOperations(unsigned long mask) {
     return availableFunctions.canDoOperations(mask);
 }
 
-double FluidicMachineNode::doOperation(OperationType op, int nargs, va_list args) throw (std::invalid_argument) {
+double FluidicMachineNode::doOperation(OperationType op, int nargs, ...) throw (std::invalid_argument) {
     try {
-        return availableFunctions.doOperation(op, nargs, args);
+        va_list args;
+        va_start(args, nargs);
+        double returnedValue = availableFunctions.doOperation(op, nargs, args);
+        va_end(args);
+        return returnedValue;
     } catch (std::invalid_argument & e) {
         throw (std::invalid_argument(" container " + std::to_string(containerID) + " fail to doOperation, " + std::string(e.what())));
     }
