@@ -2,7 +2,6 @@
 #define FLUIDICMACHINEMODEL_H
 
 #define UNDEFINE_VAR_STATUS -1
-#define LONG_LONG_DIGITS_SIZE 18
 
 #include <bitset>
 #include <cmath>
@@ -12,8 +11,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "machinestate.h"
-#include "machineflow.h"
+#include "machine_graph_utils/machinestate.h"
+#include "machine_graph_utils/machineflow.h"
 #include "constraintssolverinterface/translationstack.h"
 #include "constraintssolverinterface/routingengine.h"
 #include "graph/Graph.h"
@@ -42,11 +41,12 @@ public:
     void loadContainer(short int id, float volume) throw(std::invalid_argument);
     void setContinuousFlow(short int idStart, short int idEnd, float flowRate) throw(std::invalid_argument);
     void stopContinuousFlow(short int idStart, short int idEnd) throw(std::invalid_argument);
+    void calculateNewRoute() throw(std::runtime_error);
 
     void setTranslationStack(std::shared_ptr<TranslationStack> translationStack);
     void updatePluginFactory(std::shared_ptr<PluginAbstractFactory> factory);
 
-    void calculateNewRoute() throw(std::runtime_error);
+    std::shared_ptr<FluidicMachineNode> getNode(int id) throw(std::invalid_argument);
 
 protected:
     short int openContainers;
@@ -64,10 +64,9 @@ protected:
 
     std::shared_ptr<RoutingEngine> translateRules() throw(std::runtime_error);
     void analizeGraph() throw(std::overflow_error);
-    short int calculateMaxOpenContainers(short int ratePrecisionDecimal, short int ratePrecisionInteger);
 
     void addStack2State(const std::deque<short int> & queue, float rate, MachineState & state) throw(std::invalid_argument);
-    void sendState2components(const MachineState & state) throw(std::runtime_error);
+    void sendActualState2components() throw(std::runtime_error);
 };
 
 #endif // FLUIDICMACHINEMODEL_H

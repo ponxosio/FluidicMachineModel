@@ -3,19 +3,22 @@
 TubeEdge::TubeEdge() :
     Edge()
 {
-    this->flow = 0;
+    this->direction = unknow;
+    cutted = false;
 }
 
 TubeEdge::TubeEdge(const TubeEdge & edge) :
     Edge(edge)
 {
-    this->flow = edge.flow;
+    this->direction = edge.direction;
+    this->cutted = edge.cutted;
 }
 
 TubeEdge::TubeEdge(int idSource, int idTarget) :
     Edge(idSource, idTarget)
 {
-    this->flow = 0;
+    this->direction = unknow;
+    cutted = false;
 }
 
 TubeEdge::~TubeEdge() {

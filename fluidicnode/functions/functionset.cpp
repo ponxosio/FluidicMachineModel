@@ -60,7 +60,7 @@ void FunctionSet::addOperation(std::shared_ptr<Function> function) {
 
 void FunctionSet::setFactory(std::shared_ptr<PluginAbstractFactory> factory) {
     for (auto it : functionsMap) {
-        it->second->setFactory(factory);
+        it.second->setFactory(factory);
     }
 }
 

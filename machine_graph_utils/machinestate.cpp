@@ -1,15 +1,28 @@
 #include "machinestate.h"
 
-MachineState::MachineState() {
-
+MachineState::MachineState(short int ratePrecisionInteger, short int ratePrecisionDecimal) {
+    this->ratePrecisionInteger = ratePrecisionInteger;
+    this->ratePrecisionDecimal = ratePrecisionDecimal;
 }
 
-MachineState::MachineState(const std::unordered_map<std::string, long long> & states) throw (std::invalid_argument) {
+MachineState::MachineState(short int ratePrecisionInteger,
+                           short int ratePrecisionDecimal,
+                           const std::unordered_map<std::string, long long> & states) throw (std::invalid_argument)
+{
+    this->ratePrecisionInteger = ratePrecisionInteger;
+    this->ratePrecisionDecimal = ratePrecisionDecimal;
     setAllStates(states);
 }
 
 MachineState::~MachineState() {
 
+}
+
+short int MachineState::getMaxOpenContainers() {
+    short int digits = LONG_LONG_DIGITS_SIZE - (ratePrecisionDecimal + ratePrecisionInteger);
+    double maxNumber = pow(10, digits) - 1;
+    double n = std::log2(maxNumber);
+    return (short int) std::round(n);
 }
 
 std::unordered_map<std::string, long long> MachineState::getAllValues() {
@@ -140,7 +153,7 @@ long long MachineState::getTubeState(int idSource, int idTarget) throw(std::inva
         long long cState = it->second;
         return cState;
     } else {
-        throw(std::invalid_argument(std::to_string(id) + " is not present or is not a tube"));
+        throw(std::invalid_argument(std::to_string(idSource) + "->" + std::to_string(idTarget)  + " is not present or is not a tube"));
     }
 }
 
@@ -149,7 +162,7 @@ void MachineState::addTubeState(int idSource, int idTarget, long long state) {
     auto it = tubesMap.find(varName);
 
     if (it == tubesMap.end()) {
-        tubesMap.insert(varName, state);
+        tubesMap.insert(std::make_pair(varName, state));
     } else {
         it->second = addStates(state, it->second);
     }
@@ -160,7 +173,7 @@ void MachineState::overrideTubeState(int idSource, int idTarget, long long state
     auto it = tubesMap.find(varName);
 
     if (it == tubesMap.end()) {
-        tubesMap.insert(varName, state);
+        tubesMap.insert(std::make_pair(varName, state));
     } else {
         it->second = state;
     }
@@ -270,7 +283,7 @@ long long MachineState::rateToInt(float rate) throw (std::overflow_error) {
 
 float MachineState::rateToFloat(long long rate) {
     float integer = trunc(rate/pow(10, ratePrecisionDecimal));
-    float decimal = rate % pow(10, ratePrecisionDecimal);
+    float decimal = rate % (long long)pow(10, ratePrecisionDecimal);
     return integer + decimal;
 }
 
@@ -284,6 +297,6 @@ long long MachineState::generateState(int liquidId, float rate) throw(std::overf
             throw(std::overflow_error( std::to_string(liquidId) + " is too big, max id " + std::to_string(maxId)));
         }
     } catch (std::overflow_error & e) {
-        throw(std::overflow_error("generateState: " + e.what()));
+        throw(std::overflow_error("generateState: " + std::string(e.what())));
     }
 }

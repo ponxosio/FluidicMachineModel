@@ -6,6 +6,13 @@
 class TubeEdge : public Edge
 {
 public:
+    typedef enum TubeDirection_ {
+        unknow, //tube direction has not been set.
+        regular, // tube direction = idSource->idTarget
+        inverted // tube direction = idSource<-idTarget
+    } TubeDirection;
+
+
     TubeEdge();
     TubeEdge(const TubeEdge & edge);
     TubeEdge(int idSource, int idTarget);
@@ -13,15 +20,25 @@ public:
 
     virtual std::string toText();
 
-    inline int getFlow() {
-        return flow;
+    inline TubeDirection getDirection() {
+        return direction;
     }
 
-    inline void setFlow(int flow) {
-        this->flow = flow;
+    inline void setDirection(TubeDirection dir) {
+        this->direction = dir;
     }
+
+    inline void cutEdge() {
+        cutted = true;
+    }
+
+    inline bool isCutted() {
+        return cutted;
+    }
+
 protected:
-    int flow;
+    bool cutted;
+    TubeDirection direction;
 };
 
 #endif // TUBEEDGE_H

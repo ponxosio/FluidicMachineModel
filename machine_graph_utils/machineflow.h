@@ -8,11 +8,13 @@
 
 #include "util/Utils.h"
 
-class MachineFlow
+#include "fluidicmachinemodel_global.h"
+
+class MACHINE_FLOW_EXPORT MachineFlow
 {
 public:
-    typedef std::vector<PathRateTuple> FlowsVector;
     typedef std::tuple<std::deque<short int>,float> PathRateTuple;
+    typedef std::vector<PathRateTuple> FlowsVector;
 
     MachineFlow();
     virtual ~MachineFlow();
@@ -20,6 +22,11 @@ public:
     void addFlow(short int idSource, short int idTarget, float rate);
     void removeFlow(short int idSource, short int idTarget);
     const FlowsVector & updateFlows();
+
+    inline void clear() {
+        previous.clear();
+        actual.clear();
+    }
 
 protected:
     FlowsVector previous;

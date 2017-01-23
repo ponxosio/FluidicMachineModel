@@ -20,12 +20,16 @@ class MachineState
 {
 public: 
     MachineState(short int ratePrecisionInteger, short int ratePrecisionDecimal);
-    MachineState(const std::unordered_map<std::string, long long> & states) throw (std::invalid_argument);
+    MachineState(short int ratePrecisionInteger,
+                 short int ratePrecisionDecimal,
+                 const std::unordered_map<std::string, long long> & states) throw (std::invalid_argument);
     virtual ~MachineState();
+
+    short int getMaxOpenContainers();
 
     std::unordered_map<std::string, long long> getAllValues();
     std::unordered_map<std::string, long long> getAllContainersTubes();
-    void setAllStates(const std::vector<std::tuple<std::string, long long>> & states) throw (std::invalid_argument);
+    void setAllStates(const std::unordered_map<std::string, long long> & states) throw (std::invalid_argument);
 
     int getContainerId(const std::string & containerNameVar) throw(std::invalid_argument);
     long long getContainerState(int id) throw(std::invalid_argument);
@@ -36,7 +40,7 @@ public:
     std::tuple<int,int> getTubeId(const std::string & tubeNameVar) throw(std::invalid_argument);
     long long getTubeState(int idSource, int idTarget) throw(std::invalid_argument);
     void overrideTubeState(int idSource, int idTarget, long long state);
-    void addTubeState(int id, long long state) throw(std::invalid_argument);
+    void addTubeState(int idSource, int idTarget, long long state) throw(std::invalid_argument);
     const std::unordered_map<std::string, long long> & getAllTubes();
 
     int getPumpId(const std::string & pumpVarName) throw(std::invalid_argument);
@@ -53,6 +57,14 @@ public:
     float rateToFloat(long long rate);
     long long generateState(int liquidId, float rate) throw(std::runtime_error);
 
+    inline short int getRatePrecisionInteger() {
+        return ratePrecisionInteger;
+    }
+
+    inline short int getRatePrecisionDecimal() {
+        return ratePrecisionDecimal;
+    }
+
 protected:
     short int ratePrecisionInteger;
     short int ratePrecisionDecimal;
@@ -66,7 +78,7 @@ protected:
     long long addStates(long long state1, long long state2) throw(std::overflow_error);
 
     inline long long getRate(long long state) {
-        return abs(state % pow(10,ratePrecisionDecimal + ratePrecisionInteger));
+        return abs(state % (long long) pow(10,ratePrecisionDecimal + ratePrecisionInteger));
     }
 
     inline long long getId(long long state) {

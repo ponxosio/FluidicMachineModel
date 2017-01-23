@@ -7,14 +7,14 @@
 
 #include "fluidicmachinemodel_global.h"
 
-typedef enum BoolOperators_ {
-    conjuntion,
-    disjunction
-} BoolOperators;
-
 class CONJUCTION_EXPORT Conjunction : public Predicate
 {
 public:
+    typedef enum BoolOperators_ {
+        predicate_and,
+        predicate_or
+    } BoolOperators;
+
     Conjunction(std::shared_ptr<Predicate> left, BoolOperators op, std::shared_ptr<Predicate> right);
     virtual ~Conjunction();
 

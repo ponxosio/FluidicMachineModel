@@ -18,9 +18,10 @@ public:
     virtual void stackVariable(const std::string & name) = 0;
     virtual void stackNumber(int value) = 0;
     virtual void stackArithmeticBinaryOperation(int arithmeticOp) = 0;
+    virtual void stackArithmeticUnaryOperation(int unaryOp) = 0;
     virtual void stackEquality() = 0;
     virtual void stackBooleanConjuction(int booleanOp) = 0;
-    virtual void stackImplication() = 0;
+    virtual void stackVarDomain() = 0;
 };
 
 #endif // TRANSLATIONSTACK_H

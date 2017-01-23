@@ -12,7 +12,6 @@ TEMPLATE = lib
 DEFINES += FLUIDICMACHINEMODEL_LIBRARY
 
 SOURCES += fluidicmachinemodel.cpp \
-    rules/implication.cpp \
     rules/equality.cpp \
     rules/conjunction.cpp \
     rules/arithmetic/binaryoperation.cpp \
@@ -33,16 +32,20 @@ SOURCES += fluidicmachinemodel.cpp \
     fluidicnode/functions/lightfunction.cpp \
     fluidicnode/functions/stirfunction.cpp \
     fluidicnode/containernode.cpp \
-    machinestate.cpp \
-    flowvolumeengine.cpp \
-    machineflow.cpp
+    machine_graph_utils/machinestate.cpp \
+    machine_graph_utils/machineflow.cpp \
+    rules/variabledomain.cpp \
+    machine_graph_utils/graphrulesgenerator.cpp \
+    rules/arithmetic/unaryoperation.cpp \
+    util/sequence.cpp \
+    machine_graph_utils/machinegraphgenerator.cpp \
+    machinegraph.cpp
 
 HEADERS += fluidicmachinemodel.h\
         fluidicmachinemodel_global.h \
     rules/rule.h \
     rules/arithmetic/arithmeticoperable.h \
     rules/predicate.h \
-    rules/implication.h \
     rules/equality.h \
     rules/conjunction.h \
     rules/arithmetic/binaryoperation.h \
@@ -76,8 +79,14 @@ HEADERS += fluidicmachinemodel.h\
     fluidicnode/functions/stirfunction.h \
     fluidicnode/containernode.h \
     constraintssolverinterface/routingengine.h \
-    machinestate.h \
-    machineflow.h
+    machine_graph_utils/machinestate.h \
+    machine_graph_utils/machineflow.h \
+    rules/variabledomain.h \
+    machine_graph_utils/graphrulesgenerator.h \
+    rules/arithmetic/unaryoperation.h \
+    util/sequence.h \
+    machine_graph_utils/machinegraphgenerator.h \
+    machinegraph.h
 
 unix {
     target.path = /usr/lib

@@ -70,13 +70,10 @@ public:
 
 	typedef std::shared_ptr<NodeMap> NodeMapPtr;
 	typedef std::shared_ptr<EdgeMap> EdgeMapPtr;
-
-	typedef std::tuple<NodeVectorPtr, EdgeVectorPtr> SubGraphElem;
-	typedef vector<SubGraphElem> SubGraph;
-	typedef std::shared_ptr<SubGraph> SubGraphPtr;
 	//
 
 	Graph();
+    Graph(const Graph & g);
 	virtual ~Graph();
 
 	//insert graph
@@ -101,13 +98,7 @@ public:
 	//getters
 	inline EdgeVectorPtr getEdgeList() {
 		return edgeList;
-	}
-	inline SubGraphPtr getSubGraphs() {
-		if (subGraphs == NULL) {
-			calculateSubgraphs();
-		}
-		return subGraphs;
-	}
+    }
 
 	string toString();
 
@@ -121,18 +112,13 @@ protected:
 	NodeMapPtr nodeMap;
 	EdgeMapPtr leavingEdges;
 	EdgeMapPtr arrivingEdges;
-	SubGraphPtr subGraphs;
 	EdgeVectorPtr edgeList;
-
-	//methods
-	void calculateSubgraphs();
 
 	// cretors
 	NodeVectorPtr makeNodeVector();
 	EdgeVectorPtr makeEdgeVector();
 	NodeMapPtr makeNodeMap();
 	EdgeMapPtr makeEdgeMap();
-	SubGraphPtr makeSubGraph();
 };
 
 template <class NodeType, class EdgeType>
@@ -140,20 +126,20 @@ Graph<NodeType,EdgeType>::Graph() {
 	nodeMap = makeNodeMap();
 	leavingEdges = makeEdgeMap();
 	arrivingEdges = makeEdgeMap();
-	subGraphs = NULL;
 	edgeList = makeEdgeVector();
+}
+
+template <class NodeType, class EdgeType>
+Graph<NodeType,EdgeType>::Graph(const Graph & g) {
+    nodeMap = std::make_shared<NodeMap>(*g.nodeMap.get());
+    leavingEdges = std::make_shared<EdgeMap>(*g.leavingEdges.get());
+    arrivingEdges = std::make_shared<EdgeMap>(*g.arrivingEdges.get());
+    edgeList = std::make_shared<EdgeVector>(*g.edgeList.get());
 }
 
 template <class NodeType, class EdgeType>
 Graph<NodeType,EdgeType>::~Graph() {
 	clear();
-	//delete edgeList;
-	//delete nodeMap;
-	//delete leavingEdges;
-	//delete arrivingEdges;
-	/*if (subGraphs != NULL) {
-		delete subGraphs;
-	}*/
 }
 
 /**
@@ -161,42 +147,10 @@ Graph<NodeType,EdgeType>::~Graph() {
  */
 template <class NodeType, class EdgeType>
 void Graph<NodeType,EdgeType>::clear() {
-	// free the edges
-	/*for (auto it = edgeList->begin(); it != edgeList->end();
-			++it) {
-		delete *it;
-	}*/
 	edgeList->clear();
-
-	//free the nodes
-	/*for (auto it = nodeMap->begin();
-			it != nodeMap->end(); ++it) {
-		delete it->second;
-	}*/
 	nodeMap->clear();
-
-	//free the neighbor map
-	/*for (auto it = leavingEdges->begin();
-			it != leavingEdges->end(); ++it) {
-		delete it->second;
-	}*/
 	leavingEdges->clear();
-	/*for (auto it =
-			arrivingEdges->begin(); it != arrivingEdges->end(); ++it) {
-		delete it->second;
-	}*/
 	arrivingEdges->clear();
-
-	if (subGraphs != NULL) {
-		//free the neighbor map
-		/*for (auto it =
-				subGraphs->begin(); it != subGraphs->end(); ++it) {
-			SubGraphElem actual = *it;
-			delete actual.second;
-			delete actual.first;
-		}*/
-		subGraphs->clear();
-	}
 }
 
 /**
@@ -400,7 +354,7 @@ const typename Graph<NodeType, EdgeType>::EdgeVectorPtr Graph<NodeType, EdgeType
  * 	*) if both has one color and those colors are different: update all the nodes with
  * 		the bigger color to match the smaller one. (merge)
  */
-template<class NodeType, class EdgeType>
+/*template<class NodeType, class EdgeType>
 void Graph<NodeType, EdgeType>::calculateSubgraphs() {
 	subGraphs = makeSubGraph();
 	unordered_map<int,int> node_colorMap;
@@ -427,9 +381,8 @@ void Graph<NodeType, EdgeType>::calculateSubgraphs() {
 		} else if ((colorSource == -1) && (colorTarget != -1)) {
 			node_colorMap.insert(make_pair(idSource,colorTarget));
 		} else if ((colorSource != -1) && (colorTarget != -1)) {
-			/* If the two has color a merge must be performed,
-			 * the bigger color will be change to the smaller one
-			 */
+            // If the two has color a merge must be performed,
+             // the bigger color will be change to the smaller one
 			if (colorSource != colorTarget) {
 				int colorWin = min(colorSource, colorTarget);
 				int colorChange =
@@ -488,7 +441,7 @@ string Graph<NodeType, EdgeType>::toString() {
 
 	myfile << "}";
 	return myfile.str();
-}
+}*/
 
 template<class NodeType, class EdgeType>
 bool Graph<NodeType, EdgeType>::areConnected(int idSource, int idTarget) {

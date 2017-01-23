@@ -8,16 +8,17 @@
 
 #include "fluidicmachinemodel_global.h"
 
-typedef enum BinaryOperators_ {
-    add,
-    subtract,
-    multiply,
-    divide
-} BinaryOperators;
-
 class BINARYOPERATION_EXPORT BinaryOperation : public ArithmeticOperable
 {
 public:
+    typedef enum BinaryOperators_ {
+        add,
+        subtract,
+        multiply,
+        divide,
+        module
+    } BinaryOperators;
+
     BinaryOperation(std::shared_ptr<ArithmeticOperable> left, BinaryOperators op, std::shared_ptr<ArithmeticOperable> right);
     virtual ~BinaryOperation();
 

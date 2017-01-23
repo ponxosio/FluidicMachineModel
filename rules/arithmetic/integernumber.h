@@ -8,17 +8,17 @@
 class INTEGERNUMBER_EXPORT IntegerNumber : public ArithmeticOperable
 {
 public:
-    IntegerNumber(int value);
+    IntegerNumber(long long value);
     virtual ~IntegerNumber();
 
     virtual void fillTranslationStack(TranslationStack* stack);
 
-    inline int getValue() {
+    inline long long getValue() {
         return value;
     }
 
 protected:
-    int value;
+    long long value;
 };
 
 #endif // INTEGERNUMBER_H

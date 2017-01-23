@@ -18,9 +18,14 @@ public:
 
 
     const std::vector<std::vector<int>> & getConnectedPins(int position) throw (std::invalid_argument);
+    std::vector<int> getValvePossibleValues();
 
     inline int getNumOfPositions() {
         return truthTable.size();
+    }
+
+    inline const TruthTable & getTruthTable() {
+        return truthTable;
     }
 
 protected:

@@ -1,7 +1,7 @@
 #ifndef ARITHMETICOPERABLE_H
 #define ARITHMETICOPERABLE_H
 
-#include "rules/translationstack.h"
+#include "constraintssolverinterface/translationstack.h"
 
 class ArithmeticOperable
 {

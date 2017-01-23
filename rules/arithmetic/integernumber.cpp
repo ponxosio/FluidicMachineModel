@@ -1,6 +1,6 @@
 #include "integernumber.h"
 
-IntegerNumber::IntegerNumber(int value) :
+IntegerNumber::IntegerNumber(long long value) :
     ArithmeticOperable()
 {
     this->value = value;
