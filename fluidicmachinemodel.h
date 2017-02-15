@@ -11,28 +11,30 @@
 #include <unordered_map>
 #include <vector>
 
+#include "machinegraph.h"
 #include "machine_graph_utils/machinestate.h"
 #include "machine_graph_utils/machineflow.h"
+#include "machine_graph_utils/variablenominator.h"
+
 #include "constraintssolverinterface/translationstack.h"
 #include "constraintssolverinterface/routingengine.h"
-#include "graph/Graph.h"
+
 #include "fluidicnode/fluidicmachinenode.h"
 #include "fluidicnode/containernode.h"
 #include "fluidicnode/pumpnode.h"
 #include "fluidicnode/valvenode.h"
 #include "fluidicedge/tubeedge.h"
+
 #include "plugininterface/pluginabstractfactory.h"
+
 #include "rules/rule.h"
 
 #include "fluidicmachinemodel_global.h"
 
 class FLUIDICMACHINEMODELSHARED_EXPORT FluidicMachineModel
-{
-
-    typedef std::shared_ptr<Graph<FluidicMachineNode, TubeEdge>> MachineGraph;
+{   
 public:
-
-    FluidicMachineModel(MachineGraph graph,
+    FluidicMachineModel(std::shared_ptr<MachineGraph> graph,
                         std::shared_ptr<TranslationStack> translationStack = std::shared_ptr<TranslationStack>(),
                         short int ratePrecisionInteger = 3,
                         short int ratePrecisionDecimal = 2) throw(std::overflow_error);
@@ -52,11 +54,10 @@ protected:
     short int openContainers;
     short int maxOpenContainer;
 
-    MachineGraph graph;
+    std::shared_ptr<MachineGraph> graph;
 
     MachineState actualFullMachineState;
     MachineFlow flowEngine;
-    std::unordered_map<short int,short int> idOpenContainerLiquidIdMap;
 
     std::shared_ptr<TranslationStack> translationStack;
     std::vector<std::shared_ptr<Rule>> rules;

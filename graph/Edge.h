@@ -72,6 +72,10 @@ public:
         return std::to_string(idSource) + "->" + std::to_string(idTarget) + ";";
 	}
 
+    inline virtual Edge* clone() {
+        return new Edge(*this);
+    }
+
 	//SERIALIZATIoN
 	template<class Archive>
 	void serialize(Archive & ar, std::uint32_t const version);

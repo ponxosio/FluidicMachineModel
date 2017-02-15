@@ -12,6 +12,7 @@ VariableDomain::~VariableDomain() {
 }
 
 void VariableDomain::fillTranslationStack(TranslationStack* stack) {
+    std::sort(domain.begin(), domain.end(), DomainTupleComparator());
     for (std::tuple<std::shared_ptr<IntegerNumber>,std::shared_ptr<IntegerNumber>> tuple: domain) {
         std::get<0>(tuple)->fillTranslationStack(stack);
         std::get<1>(tuple)->fillTranslationStack(stack);

@@ -9,7 +9,9 @@
 #include "plugininterface/pluginconfiguration.h"
 #include "plugininterface/pumppluginproduct.h"
 
-class PumpPluginFunction : public Function
+#include "fluidicmachinemodel_global.h"
+
+class PUMPPLUGINFUNCTION_EXPORT PumpPluginFunction : public Function
 {
 public:
     PumpPluginFunction(std::shared_ptr<PluginAbstractFactory> factory, const PluginConfiguration & configuration);

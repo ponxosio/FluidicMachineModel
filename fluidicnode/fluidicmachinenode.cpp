@@ -31,12 +31,21 @@ void FluidicMachineNode::connectToPin(int pin, std::shared_ptr<TubeEdge> edge) t
     if (pin < numberOfPins) {
         auto it = pinConnectionMap.find(pin);
         if (it != pinConnectionMap.end()) {
-            it->second = edge;
+            it->second = std::make_tuple<int,int>(edge->getIdSource(), edge->getIdTarget());
         } else {
-            pinConnectionMap.insert(std::make_pair(pin, edge));
+            pinConnectionMap.insert(std::make_pair(pin, std::make_tuple(edge->getIdSource(), edge->getIdTarget())));
         }
     } else {
         throw(std::invalid_argument("the node does not has pin number " + std::to_string(pin)));
+    }
+}
+
+std::tuple<int,int> FluidicMachineNode::getTubeIdConnectedToPin(int id) throw (std::invalid_argument) {
+    auto it = pinConnectionMap.find(id);
+    if (it != pinConnectionMap.end()) {
+        return it->second;
+    } else {
+        throw(std::invalid_argument("unknow pin id: " + std::to_string(id)));
     }
 }
 

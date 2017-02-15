@@ -8,7 +8,9 @@
 #include "plugininterface/pluginconfiguration.h"
 #include "plugininterface/valvepluginproduct.h"
 
-class ValvePluginRouteFunction : public Function
+#include "fluidicmachinemodel_global.h"
+
+class VALVEPLUGINGROUTINGFUNCTION_EXPORT ValvePluginRouteFunction : public Function
 {
 public:
     ValvePluginRouteFunction(std::shared_ptr<PluginAbstractFactory> factory, const PluginConfiguration & configuration);

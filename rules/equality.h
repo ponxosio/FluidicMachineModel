@@ -11,7 +11,16 @@
 class EQUALITY_EXPORT Equality : public Predicate
 {
 public:
-    Equality(std::shared_ptr<ArithmeticOperable> left, std::shared_ptr<ArithmeticOperable> rigth);
+    typedef enum ComparatorOp_ {
+        not_equal,
+        equal,
+        bigger,
+        bigger_equal,
+        lesser,
+        lesser_equal
+    }ComparatorOp;
+
+    Equality(std::shared_ptr<ArithmeticOperable> left, ComparatorOp op, std::shared_ptr<ArithmeticOperable> rigth);
     virtual ~Equality();
 
     virtual void fillTranslationStack(TranslationStack* stack);
@@ -25,6 +34,7 @@ public:
     }
 
 protected:
+    ComparatorOp op;
     std::shared_ptr<ArithmeticOperable> left;
     std::shared_ptr<ArithmeticOperable> rigth;
 };

@@ -9,7 +9,7 @@
 
 #include "fluidicmachinemodel_global.h"
 
-class Sequence
+class SEQUENCE_EXPORT Sequence
 {
 public:
     Sequence(int startValue, int endValue, const std::vector<int>* forbidenValuesVector = nullptr) throw (std::invalid_argument);
@@ -18,8 +18,7 @@ public:
     virtual ~Sequence();
 
     void reset();
-    bool hasEnded();
-    int nextValue() throw(std::runtime_error);
+    bool advanceSequence() throw(std::runtime_error);
     int getActualValue();
 
 protected:

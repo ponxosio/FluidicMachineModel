@@ -35,11 +35,15 @@ SOURCES += fluidicmachinemodel.cpp \
     machine_graph_utils/machinestate.cpp \
     machine_graph_utils/machineflow.cpp \
     rules/variabledomain.cpp \
-    machine_graph_utils/graphrulesgenerator.cpp \
     rules/arithmetic/unaryoperation.cpp \
     util/sequence.cpp \
-    machine_graph_utils/machinegraphgenerator.cpp \
-    machinegraph.cpp
+    machinegraph.cpp \
+    machine_graph_utils/variablenominator.cpp \
+    machine_graph_utils/graphrulesgenerator.cpp \
+    machine_graph_utils/rules_generation/commomrulesoperations.cpp \
+    machine_graph_utils/rules_generation/domaingenerator.cpp \
+    machine_graph_utils/rules_generation/machinegraphgenerator.cpp \
+    machine_graph_utils/rules_generation/statepredicategenerator.cpp
 
 HEADERS += fluidicmachinemodel.h\
         fluidicmachinemodel_global.h \
@@ -82,11 +86,15 @@ HEADERS += fluidicmachinemodel.h\
     machine_graph_utils/machinestate.h \
     machine_graph_utils/machineflow.h \
     rules/variabledomain.h \
-    machine_graph_utils/graphrulesgenerator.h \
     rules/arithmetic/unaryoperation.h \
     util/sequence.h \
-    machine_graph_utils/machinegraphgenerator.h \
-    machinegraph.h
+    machinegraph.h \
+    machine_graph_utils/variablenominator.h \
+    machine_graph_utils/graphrulesgenerator.h \
+    machine_graph_utils/rules_generation/commomrulesoperations.h \
+    machine_graph_utils/rules_generation/domaingenerator.h \
+    machine_graph_utils/rules_generation/machinegraphgenerator.h \
+    machine_graph_utils/rules_generation/statepredicategenerator.h
 
 unix {
     target.path = /usr/lib

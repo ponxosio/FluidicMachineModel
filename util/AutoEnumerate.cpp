@@ -11,6 +11,10 @@ AutoEnumerate::AutoEnumerate() {
 	this->actualValue = 0;
 }
 
+AutoEnumerate::AutoEnumerate(const AutoEnumerate & e) {
+    this->actualValue = e.actualValue;
+}
+
 AutoEnumerate::~AutoEnumerate() {}
 
 int AutoEnumerate::getValue() {

@@ -1,17 +1,14 @@
 #include "machinestate.h"
 
-MachineState::MachineState(short int ratePrecisionInteger, short int ratePrecisionDecimal) {
-    this->ratePrecisionInteger = ratePrecisionInteger;
-    this->ratePrecisionDecimal = ratePrecisionDecimal;
-}
-
-MachineState::MachineState(short int ratePrecisionInteger,
-                           short int ratePrecisionDecimal,
-                           const std::unordered_map<std::string, long long> & states) throw (std::invalid_argument)
+MachineState::MachineState(std::shared_ptr<MachineGraph> graph,
+                           short int ratePrecisionInteger,
+                           short int ratePrecisionDecimal)
+    throw(std::invalid_argument)
 {
+    this->graph = graph;
     this->ratePrecisionInteger = ratePrecisionInteger;
     this->ratePrecisionDecimal = ratePrecisionDecimal;
-    setAllStates(states);
+    analizeGraph();
 }
 
 MachineState::~MachineState() {
@@ -48,50 +45,40 @@ void MachineState::setAllStates(const std::unordered_map<std::string, long long>
     valvesMap.clear();
     pumpsMap.clear();
     pumpsRatesMap.clear();
+    analizeGraph();
 
     for(auto varTuple: states) {
         std::string name = varTuple.first;
         long long value = varTuple.second;
-
-        const char firstChar = name.at(0);
-        switch (firstChar) {
-        case 'C':
-            containersMap.insert(std::make_pair(name,value));
-            break;
-        case 'T':
-            tubesMap.insert(std::make_pair(name,value));
-            break;
-        case 'P':
-            pumpsMap.insert(std::make_pair(name,value));
-            break;
-        case 'R':
-            pumpsRatesMap.insert(std::make_pair(name,value));
-            break;
-        case 'V':
-            valvesMap.insert(std::make_pair(name,value));
-            break;
-        default:
-            throw (std::invalid_argument("unknow var format, " + name));
-        }
-    }
-}
-
-int MachineState::getContainerId(const std::string & containerNameVar) throw(std::invalid_argument) {
-    if (containerNameVar.at(0) == 'C') {
-        std::string id = containerNameVar.substr(2);
         try {
-            int idValue = std::stoi(id, nullptr);
-            return idValue;
+            VariableNominator::VariableType nameType = VariableNominator::getVariableType(name);
+            switch (nameType) {
+            case VariableNominator::container:
+                overrideContainerState(name, value);
+                break;
+            case VariableNominator::tube:
+                overrideTubeState(name, value);
+                break;
+            case VariableNominator::pump:
+                overridePumpDir(name, value);
+                break;
+            case VariableNominator::rate:
+                overridePumpRate(name, value);
+                break;
+            case VariableNominator::valve:
+                overrideValvePosition(name, value);
+                break;
+            default:
+                break;
+            }
         } catch (std::invalid_argument & e) {
-            throw (std::invalid_argument("error extracting id from the variable " + containerNameVar + ", error message: " + e.what()));
+            throw(std::invalid_argument("error setting variable " + name + ". Error:" + std::string(e.what())));
         }
-    } else {
-        throw(std::invalid_argument("variable " + containerNameVar + " is not a container variable"));
     }
 }
 
-long long MachineState::getContainerState(int id) throw(std::invalid_argument) {
-    std::string varName = "C_" + std::to_string(id);
+long long MachineState::getContainerState(int id) throw(std::invalid_argument) {   
+    std::string varName = VariableNominator::getContainerVarName(id);
     auto it = containersMap.find(varName);
 
     if (it != containersMap.end()) {
@@ -103,24 +90,29 @@ long long MachineState::getContainerState(int id) throw(std::invalid_argument) {
 }
 
 void MachineState::overrideContainerState(int id, long long state) throw(std::invalid_argument) {
-    std::string varName = "C_" + std::to_string(id);
+    std::string varName = VariableNominator::getContainerVarName(id);
     auto it = containersMap.find(varName);
 
-    if (it == containersMap.end()) {
-        containersMap.insert(std::make_pair(varName, state));
-    } else {
+    if (it != containersMap.end()) {
         it->second = state;
+    } else {
+        throw(std::invalid_argument(std::to_string(id) + " is not present or is not a container"));
     }
 }
 
 void MachineState::addContainerState(int id, long long state) throw(std::invalid_argument) {
-    std::string varName = "C_" + std::to_string(id);
+    std::string varName = VariableNominator::getContainerVarName(id);
     auto it = containersMap.find(varName);
 
-    if (it == containersMap.end()) {
-        containersMap.insert(std::make_pair(varName, state));
+    if (it != containersMap.end()) {
+        try {
+            it->second = addStates(state, it->second);
+        } catch (std::invalid_argument & e) {
+            throw(std::invalid_argument("imposible to add container " + std::to_string(id) +
+                                        " state. Error message: " + std::string(e.what())));
+        }
     } else {
-        it->second = addStates(state, it->second);
+        throw(std::invalid_argument(std::to_string(id) + " is not present or is not a container"));
     }
 }
 
@@ -128,25 +120,8 @@ const std::unordered_map<std::string, long long> & MachineState::getAllContainer
     return containersMap;
 }
 
-std::tuple<int,int> MachineState::getTubeId(const std::string & tubeNameVar) throw(std::invalid_argument) {
-    if (tubeNameVar.at(0) == 'T') {
-        int lastUnderScore = tubeNameVar.find_last_of("_");
-        std::string idSource = tubeNameVar.substr(2,lastUnderScore);
-        std::string idTarget = tubeNameVar.substr(lastUnderScore + 1);
-        try {
-            int sourceValue = std::stoi(idSource, nullptr);
-            int targetValue = std::stoi(idTarget, nullptr);
-            return std::make_tuple(sourceValue, targetValue);
-        } catch (std::invalid_argument & e) {
-            throw (std::invalid_argument("error extracting id from the variable " + tubeNameVar + ". Error message: " + e.what()));
-        }
-    } else {
-        throw(std::invalid_argument("variable " + tubeNameVar + " is not a tube variable"));
-    }
-}
-
 long long MachineState::getTubeState(int idSource, int idTarget) throw(std::invalid_argument) {
-    std::string varName = "T_" + std::to_string(idSource) + "_" + std::to_string(idTarget);
+    std::string varName = VariableNominator::getTubeVarName(idSource, idTarget);
     auto it = tubesMap.find(varName);
 
     if (it != tubesMap.end()) {
@@ -157,25 +132,30 @@ long long MachineState::getTubeState(int idSource, int idTarget) throw(std::inva
     }
 }
 
-void MachineState::addTubeState(int idSource, int idTarget, long long state) {
-    std::string varName = "T_" + std::to_string(idSource) + "_" + std::to_string(idTarget);
+void MachineState::addTubeState(int idSource, int idTarget, long long state) throw(std::invalid_argument) {
+    std::string varName = VariableNominator::getTubeVarName(idSource, idTarget);
     auto it = tubesMap.find(varName);
 
-    if (it == tubesMap.end()) {
-        tubesMap.insert(std::make_pair(varName, state));
+    if (it != tubesMap.end()) {
+        try {
+            it->second = addStates(state, it->second);
+        } catch (std::invalid_argument & e) {
+            throw(std::invalid_argument(std::to_string(idSource) + "->" + std::to_string(idTarget)  +
+                                        " imposible to add state. Error message: " + std::string(e.what())));
+        }
     } else {
-        it->second = addStates(state, it->second);
+        throw(std::invalid_argument(std::to_string(idSource) + "->" + std::to_string(idTarget)  + " is not present or is not a tube"));
     }
 }
 
-void MachineState::overrideTubeState(int idSource, int idTarget, long long state) {
-    std::string varName = "T_" + std::to_string(idSource) + "_" + std::to_string(idTarget);
+void MachineState::overrideTubeState(int idSource, int idTarget, long long state) throw (std::invalid_argument) {
+    std::string varName = VariableNominator::getTubeVarName(idSource, idTarget);
     auto it = tubesMap.find(varName);
 
-    if (it == tubesMap.end()) {
-        tubesMap.insert(std::make_pair(varName, state));
-    } else {
+    if (it != tubesMap.end()) {
         it->second = state;
+    } else {
+        throw(std::invalid_argument(std::to_string(idSource) + "->" + std::to_string(idTarget)  + " is not present or is not a tube"));
     }
 }
 
@@ -183,22 +163,8 @@ const std::unordered_map<std::string, long long> & MachineState::getAllTubes() {
     return tubesMap;
 }
 
-int MachineState::getPumpId(const std::string & pumpVarName) throw(std::invalid_argument) {
-    if (pumpVarName.at(0) == 'P') {
-        std::string id = pumpVarName.substr(2);
-        try {
-            int idValue = std::stoi(id, nullptr);
-            return idValue;
-        } catch (std::invalid_argument & e) {
-            throw (std::invalid_argument("error extracting id from the variable " + pumpVarName + ", error message: " + e.what()));
-        }
-    } else {
-        throw(std::invalid_argument("variable " + pumpVarName + " is not a pump variable"));
-    }
-}
-
 long long MachineState::getPumpDir(int id) throw (std::invalid_argument) {
-    std::string varName = "P_" + std::to_string(id);
+    std::string varName = VariableNominator::getPumpVarName(id);
     auto it = pumpsMap.find(varName);
 
     if (it != pumpsMap.end()) {
@@ -210,7 +176,7 @@ long long MachineState::getPumpDir(int id) throw (std::invalid_argument) {
 }
 
 float MachineState::getPumpRate(int id) throw (std::invalid_argument) {
-    std::string varName = "R_" + std::to_string(id);
+    std::string varName = VariableNominator::getPumpRateVarName(id);
     auto it = pumpsRatesMap.find(varName);
 
     if (it != pumpsRatesMap.end()) {
@@ -229,22 +195,8 @@ const std::unordered_map<std::string, long long> & MachineState::getAllPumpsRate
     return pumpsRatesMap;
 }
 
-int MachineState::getValveId(const std::string & valveVarname) throw(std::invalid_argument) {
-    if (valveVarname.at(0) == 'V') {
-        std::string id = valveVarname.substr(2);
-        try {
-            int idValue = std::stoi(id, nullptr);
-            return idValue;
-        } catch (std::invalid_argument & e) {
-            throw (std::invalid_argument("error extracting id from the variable " + valveVarname + ", error message: " + e.what()));
-        }
-    } else {
-        throw(std::invalid_argument("variable " + valveVarname + " is not a valve variable"));
-    }
-}
-
 long long MachineState::getValvePosition(int id) {
-    std::string varName = "V_" + std::to_string(id);
+    std::string varName = VariableNominator::getValveVarName(id);
     auto it = valvesMap.find(varName);
 
     if (it != valvesMap.end()) {
@@ -262,11 +214,17 @@ const std::unordered_map<std::string, long long> & MachineState::getAllValves() 
 long long MachineState::addStates(long long state1, long long state2) throw(std::invalid_argument) {
     long long rate1 = getRate(state1);
     if (rate1 == getRate(state2)) {
-        long long id1 = getId(state1);
-        long long id2 = getId(state2);
-        return generateState(id1 + id2, rate1);
+        try {
+            long long id1 = getId(state1);
+            long long id2 = getId(state2);
+            return generateState(id1 + id2, rate1);
+        } catch (std::overflow_error & e) {
+            throw(std::invalid_argument("imposible to add " + std::to_string(state1) + " and " + std::to_string(state2) +
+                                        ", overflow error. Message: " + std::string(e.what())));
+        }
     } else {
-        throw(std::invalid_argument("imposible to add " + std::to_string(state1) + " and " + std::to_string(state2) + ", to add two states their rates must be the same" ));
+        throw(std::invalid_argument("imposible to add " + std::to_string(state1) + " and " + std::to_string(state2) +
+                                    ", to add two states their rates must be the same" ));
     }
 }
 
@@ -300,3 +258,170 @@ long long MachineState::generateState(int liquidId, float rate) throw(std::overf
         throw(std::overflow_error("generateState: " + std::string(e.what())));
     }
 }
+
+void MachineState::analizeGraph() throw (std::invalid_argument) {
+    for (int pumpId : graph->getPumpsIdsSet()) {
+        try {
+            insertPump(pumpId);
+            insertPumpRate(pumpId);
+        } catch (std::invalid_argument & e) {
+            throw(std::invalid_argument("Error while analyzing pumps: " + std::string(e.what())));
+        }
+    }
+
+    for (int valveId : graph->getValvesIdsSet()) {
+        try {
+            insertValve(valveId);
+        } catch (std::invalid_argument & e) {
+            throw(std::invalid_argument("Error while analyzing valves: " + std::string(e.what())));
+        }
+    }
+
+    for (int opencontainerId : graph->getOpenContainersIdsSet()) {
+        try {
+            insertContainer(opencontainerId);
+        } catch (std::invalid_argument & e) {
+            throw(std::invalid_argument("Error while analyzing open containers: " + std::string(e.what())));
+        }
+    }
+
+    for (int closeContainerId : graph->getCloseContainersIdsSet()) {
+        try {
+            insertContainer(closeContainerId);
+        } catch (std::invalid_argument & e) {
+            throw(std::invalid_argument("Error while analyzing closeContainerId: " + std::string(e.what())));
+        }
+    }
+
+    for (auto edgeTuple : *graph->getAlledgesMap().get()) {
+        try {
+            MachineGraph::GraphType::EdgeTypePtr edgePtr = edgeTuple.second;
+            insertTube(edgePtr->getIdSource(), edgePtr->getIdTarget());
+        } catch (std::invalid_argument & e) {
+            throw(std::invalid_argument("Error while analyzing tubes: " + std::string(e.what())));
+        }
+    }
+}
+
+void MachineState::insertPump(int id) throw(std::invalid_argument) {
+    std::string varName = VariableNominator::getPumpVarName(id);
+
+    auto it = pumpsMap.find(varName);
+    if (it == pumpsMap.end()) {
+        pumpsMap.insert(std::make_pair(varName, 0));
+    } else {
+        throw(std::invalid_argument("cannot insert pump, already exists key: " + varName));
+    }
+}
+
+void MachineState::insertPumpRate(int id) throw(std::invalid_argument) {
+    std::string varName = VariableNominator::getPumpRateVarName(id);
+
+    auto it = pumpsRatesMap.find(varName);
+    if (it == pumpsRatesMap.end()) {
+        pumpsRatesMap.insert(std::make_pair(varName, 0));
+    } else {
+        throw(std::invalid_argument("cannot insert pump rate, already exists key: " + varName));
+    }
+}
+
+void MachineState::insertValve(int id) throw(std::invalid_argument) {
+    std::string varName = VariableNominator::getValveVarName(id);
+
+    auto it = valvesMap.find(varName);
+    if (it == valvesMap.end()) {
+        valvesMap.insert(std::make_pair(varName, 0));
+    } else {
+        throw(std::invalid_argument("cannot insert valve, already exists key: " + varName));
+    }
+}
+
+void MachineState::insertContainer(int id) throw(std::invalid_argument) {
+    std::string varName = VariableNominator::getContainerVarName(id);
+
+    auto it = containersMap.find(varName);
+    if (it == containersMap.end()) {
+        containersMap.insert(std::make_pair(varName, 0));
+    } else {
+        throw(std::invalid_argument("cannot insert container, already exists key: " + varName));
+    }
+}
+
+void MachineState::insertTube(int idSource, int idTarget) throw(std::invalid_argument) {
+    std::string varName = VariableNominator::getTubeVarName(idSource, idTarget);
+
+    auto it = tubesMap.find(varName);
+    if (it == tubesMap.end()) {
+        tubesMap.insert(std::make_pair(varName, 0));
+    } else {
+        throw(std::invalid_argument("cannot insert tube, already exists key: " + varName));
+    }
+}
+
+void MachineState::overrideValvePosition(const std::string & name, long long state) throw(std::invalid_argument) {
+    auto it = valvesMap.find(name);
+    if (it != valvesMap.end()) {
+        it->second = state;
+    } else {
+        throw(std::invalid_argument("imposible to override valve state: " + name + ", is not present."));
+    }
+}
+
+void MachineState::overridePumpDir(const std::string & name, long long state) throw(std::invalid_argument) {
+    auto it = pumpsMap.find(name);
+    if (it != pumpsMap.end()) {
+        it->second = state;
+    } else {
+        throw(std::invalid_argument("imposible to override pump's dir state: " + name + ", is not present."));
+    }
+}
+
+void MachineState::overridePumpRate(const std::string & name, long long state) throw(std::invalid_argument) {
+    auto it = pumpsRatesMap.find(name);
+    if (it != pumpsRatesMap.end()) {
+        it->second = state;
+    } else {
+        throw(std::invalid_argument("imposible to override pump's rate state: " + name + ", is not present."));
+    }
+}
+
+void MachineState::overrideContainerState(const std::string & name, long long state) throw(std::invalid_argument) {
+    auto it = containersMap.find(name);
+    if (it != containersMap.end()) {
+        it->second = state;
+    } else {
+        throw(std::invalid_argument("imposible to override container state: " + name + ", is not present."));
+    }
+}
+
+void MachineState::overrideTubeState(const std::string & name, long long state) throw(std::invalid_argument) {
+    auto it = tubesMap.find(name);
+    if (it != tubesMap.end()) {
+        it->second = state;
+    } else {
+        throw(std::invalid_argument("imposible to override tube's state: " + name + ", is not present."));
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

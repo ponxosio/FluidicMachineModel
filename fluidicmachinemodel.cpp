@@ -1,10 +1,10 @@
 #include "fluidicmachinemodel.h"
 
-FluidicMachineModel::FluidicMachineModel(MachineGraph graph,
+FluidicMachineModel::FluidicMachineModel(std::shared_ptr<MachineGraph> graph,
                                          std::shared_ptr<TranslationStack> translationStack,
                                          short int ratePrecisionInteger,
                                          short int ratePrecisionDecimal) throw(std::overflow_error) :
-    actualFullMachineState(ratePrecisionDecimal, ratePrecisionInteger)
+    actualFullMachineState(graph, ratePrecisionDecimal, ratePrecisionInteger)
 {
     this->graph = graph;
     this->translationStack = translationStack;
@@ -22,8 +22,8 @@ FluidicMachineModel::~FluidicMachineModel() {
 }
 
 void FluidicMachineModel::loadContainer(short int id, float volume) throw(std::invalid_argument) {
-    auto finded = idOpenContainerLiquidIdMap.find(id);
-    if (finded != idOpenContainerLiquidIdMap.end()) {
+    auto finded = graph->getOpenContainerLiquidIdMap().find(id);
+    if (finded != graph->getOpenContainerLiquidIdMap().end()) {
         std::shared_ptr<ContainerNode> openContainer = std::dynamic_pointer_cast<ContainerNode>(graph->getNode(id));
         if (openContainer) {
             short int liquid_id = finded->second;
@@ -39,10 +39,10 @@ void FluidicMachineModel::loadContainer(short int id, float volume) throw(std::i
 
 void FluidicMachineModel::setContinuousFlow(short int idStart, short int idEnd, float flowRate) throw(std::invalid_argument)
 {
-    auto findedStart = idOpenContainerLiquidIdMap.find(idStart);
-    if (findedStart != idOpenContainerLiquidIdMap.end()) {
-        auto findedEnd = idOpenContainerLiquidIdMap.find(idEnd);
-        if (findedEnd != idOpenContainerLiquidIdMap.end()) {
+    auto findedStart = graph->getOpenContainerLiquidIdMap().find(idStart);
+    if (findedStart != graph->getOpenContainerLiquidIdMap().end()) {
+        auto findedEnd = graph->getOpenContainerLiquidIdMap().find(idEnd);
+        if (findedEnd != graph->getOpenContainerLiquidIdMap().end()) {
             flowEngine.addFlow(idStart, idEnd, flowRate);
         } else {
             throw(std::invalid_argument(std::to_string(idEnd) + " is not an open container."));
@@ -53,10 +53,10 @@ void FluidicMachineModel::setContinuousFlow(short int idStart, short int idEnd, 
 }
 
 void FluidicMachineModel::stopContinuousFlow(short int idStart, short int idEnd) throw(std::invalid_argument) {
-    auto findedStart = idOpenContainerLiquidIdMap.find(idStart);
-    if (findedStart != idOpenContainerLiquidIdMap.end()) {
-        auto findedEnd = idOpenContainerLiquidIdMap.find(idEnd);
-        if (findedEnd != idOpenContainerLiquidIdMap.end()) {
+    auto findedStart = graph->getOpenContainerLiquidIdMap().find(idStart);
+    if (findedStart != graph->getOpenContainerLiquidIdMap().end()) {
+        auto findedEnd = graph->getOpenContainerLiquidIdMap().find(idEnd);
+        if (findedEnd != graph->getOpenContainerLiquidIdMap().end()) {
             flowEngine.removeFlow(idStart, idEnd);
         } else {
             throw(std::invalid_argument(std::to_string(idEnd) + " is not an open container."));
@@ -67,7 +67,7 @@ void FluidicMachineModel::stopContinuousFlow(short int idStart, short int idEnd)
 }
 
 void FluidicMachineModel::calculateNewRoute() throw(std::runtime_error) {
-    MachineState containers2Set(actualFullMachineState.getRatePrecisionInteger(), actualFullMachineState.getRatePrecisionDecimal());
+    MachineState containers2Set(graph, actualFullMachineState.getRatePrecisionInteger(), actualFullMachineState.getRatePrecisionDecimal());
     MachineFlow::FlowsVector flows2Set = flowEngine.updateFlows();
 
     try {
@@ -87,9 +87,9 @@ void FluidicMachineModel::calculateNewRoute() throw(std::runtime_error) {
 }
 
 void FluidicMachineModel::addStack2State(const std::deque<short int> & queue, float rate, MachineState & state) throw(std::invalid_argument) {
-    auto it_start = idOpenContainerLiquidIdMap.find(queue.front());
-    if(it_start != idOpenContainerLiquidIdMap.end()) {
-        if(idOpenContainerLiquidIdMap.find(queue.back()) != idOpenContainerLiquidIdMap.end()) {
+    auto it_start = graph->getOpenContainerLiquidIdMap().find(queue.front());
+    if(it_start != graph->getOpenContainerLiquidIdMap().end()) {
+        if(graph->getOpenContainerLiquidIdMap().find(queue.back()) != graph->getOpenContainerLiquidIdMap().end()) {
             try {
                 short int id = it_start->second;
                 long long stateValue = state.generateState(id, rate);
@@ -111,7 +111,7 @@ void FluidicMachineModel::addStack2State(const std::deque<short int> & queue, fl
 
  void FluidicMachineModel::sendActualState2components() throw(std::runtime_error) {
      for (const auto tuple: actualFullMachineState.getAllPumpsDirVar()) {
-        int id = actualFullMachineState.getPumpId(tuple.first);
+        int id = VariableNominator::getPumpId(tuple.first);
         int dir = tuple.second;
         float rate = actualFullMachineState.getPumpRate(id);
 
@@ -120,7 +120,7 @@ void FluidicMachineModel::addStack2State(const std::deque<short int> & queue, fl
     }
 
     for (auto tuple: actualFullMachineState.getAllValves()) {
-        int id = actualFullMachineState.getValveId(tuple.first);
+        int id = VariableNominator::getValveId(tuple.first);
         int pos = tuple.second;
 
         std::shared_ptr<FluidicMachineNode> graphNode = graph->getNode(id);

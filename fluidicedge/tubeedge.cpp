@@ -28,6 +28,24 @@ TubeEdge::~TubeEdge() {
 std::string TubeEdge::toText() {
     std::string edgestr = Edge::toText();
     edgestr = edgestr.substr(0, edgestr.size()-1);
-    edgestr += "[label=\"" + std::to_string(flow) + "\"];";
+    edgestr += "[label=\" direction=" + dirToStr() + ", cutted=" + std::to_string(cutted) + "\"];";
     return edgestr;
+}
+
+std::string TubeEdge::dirToStr() {
+    std::string str = "";
+    switch (direction) {
+    case unknow:
+        str = UNKNOW_STR;
+        break;
+    case regular:
+        str = REGULAR_STR;
+        break;
+    case inverted:
+        str = INVERTED_STR;
+        break;
+    default:
+        break;
+    }
+    return str;
 }

@@ -13,7 +13,7 @@ class ContainerNode : public FluidicMachineNode
 public:
     ContainerNode();
     ContainerNode(const ContainerNode & node);
-    ContainerNode(int idNode, ContainerType containerType, double maxVolume);
+    ContainerNode(int idNode, int numPins, ContainerType containerType, double maxVolume);
 
     void addOperation(std::shared_ptr<Function> function);
     double getMaxVolume();
@@ -21,6 +21,9 @@ public:
     void setActualVolume(double volume);
     ContainerType getContainerType();
 
+    inline virtual Node* clone() {
+        return new ContainerNode(*this);
+    }
 protected:
     double maxVolume;
     double actualVolume;

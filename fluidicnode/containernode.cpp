@@ -16,8 +16,8 @@ ContainerNode::ContainerNode(const ContainerNode & node) :
     this->containerType = node.containerType;
 }
 
-ContainerNode::ContainerNode(int idNode, ContainerType containerType, double maxVolume) :
-    FluidicMachineNode(idNode, 2)
+ContainerNode::ContainerNode(int idNode, int numPins, ContainerType containerType, double maxVolume) :
+    FluidicMachineNode(idNode, numPins)
 {
     this->containerType = containerType;
     this->maxVolume = maxVolume;

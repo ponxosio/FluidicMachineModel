@@ -76,6 +76,10 @@ public:
 		return vuelta;
 	}
 
+    inline virtual Node* clone() {
+        return new Node(*this);
+    }
+
 	//SERIALIZATIoN
 	template<class Archive>
 	void serialize(Archive & ar, std::uint32_t const version);

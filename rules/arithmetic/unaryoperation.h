@@ -12,7 +12,7 @@ typedef enum UnaryOperators_ {
     absolute_value,
 } UnaryOperators;
 
-class UnaryOperation : public ArithmeticOperable
+class UNARYOPERATION_EXPORT UnaryOperation : public ArithmeticOperable
 {
 public:
     UnaryOperation(std::shared_ptr<ArithmeticOperable> operable, UnaryOperators op);

@@ -50,12 +50,11 @@ template <class NodeType, class EdgeType> class Graph {
     static_assert(std::is_base_of<Node, NodeType>::value, "NodeType must extend Node");
     static_assert(std::is_base_of<Edge, EdgeType>::value, "EdgeType must extend Edge");
 
+    typedef Node* NodePtr;
+    typedef Edge* EdgePtr;
+
 public:
-
 	//types defs
-	typedef Node* NodePtr;
-	typedef Edge* EdgePtr;
-
 	typedef std::shared_ptr<NodeType> NodeTypePtr;
 	typedef std::shared_ptr<EdgeType> EdgeTypePtr;
 
@@ -67,9 +66,11 @@ public:
 
 	typedef unordered_map<int, NodeTypePtr> NodeMap;
 	typedef unordered_map<int, EdgeVectorPtr> EdgeMap;
+    typedef unordered_map<int, EdgeTypePtr> UniqueEdgeMap;
 
 	typedef std::shared_ptr<NodeMap> NodeMapPtr;
 	typedef std::shared_ptr<EdgeMap> EdgeMapPtr;
+    typedef std::shared_ptr<UniqueEdgeMap> UniqueEdgeMapPtr;
 	//
 
 	Graph();
@@ -78,41 +79,43 @@ public:
 
 	//insert graph
 	bool addNode(NodeTypePtr node);
-	bool addEdge(EdgeTypePtr edge);
+    void addEdge(EdgeTypePtr edge);
 
 	//retrieve
 	NodeTypePtr getNode(int containerId);
+    EdgeTypePtr getEdge(int idSource, int idTarget);
 	const EdgeVectorPtr getLeavingEdges(int idSource);
 	const EdgeVectorPtr getArrivingEdges(int idSource);
-	const NodeVectorPtr getAllNodes();
 	bool areConnected(int idSource, int idTarget);
 
 	//delete from graph
 	bool removeNode(int nodeID);
-	void removeEdge(const EdgeType & edge);
+    void removeEdge(EdgeType & edge);
 	void clear();
 
 	//save graph
     bool saveGraph(const string& filename) throw (std::runtime_error);
+    string toString();
 
-	//getters
-	inline EdgeVectorPtr getEdgeList() {
-		return edgeList;
+    inline const UniqueEdgeMapPtr getAllEdges() {
+        return edgeMap;
     }
 
-	string toString();
+    inline const NodeMapPtr getAllNodes() {
+        return nodeMap;
+    }
 
 	//SERIALIZATIoN
 	template<class Archive>
 	void serialize(Archive & ar) {
-		ar(nodeMap, leavingEdges, arrivingEdges, subGraphs, edgeList);
+        ar(nodeMap, leavingEdges, arrivingEdges, edgeMap);
 	}
 protected:
 	//attributes
 	NodeMapPtr nodeMap;
 	EdgeMapPtr leavingEdges;
 	EdgeMapPtr arrivingEdges;
-	EdgeVectorPtr edgeList;
+    UniqueEdgeMapPtr edgeMap;
 
 	// cretors
 	NodeVectorPtr makeNodeVector();
@@ -126,15 +129,27 @@ Graph<NodeType,EdgeType>::Graph() {
 	nodeMap = makeNodeMap();
 	leavingEdges = makeEdgeMap();
 	arrivingEdges = makeEdgeMap();
-	edgeList = makeEdgeVector();
+    edgeMap = std::make_shared<UniqueEdgeMap>();
 }
 
 template <class NodeType, class EdgeType>
 Graph<NodeType,EdgeType>::Graph(const Graph & g) {
-    nodeMap = std::make_shared<NodeMap>(*g.nodeMap.get());
-    leavingEdges = std::make_shared<EdgeMap>(*g.leavingEdges.get());
-    arrivingEdges = std::make_shared<EdgeMap>(*g.arrivingEdges.get());
-    edgeList = std::make_shared<EdgeVector>(*g.edgeList.get());
+    nodeMap = makeNodeMap();
+    leavingEdges = makeEdgeMap();
+    arrivingEdges = makeEdgeMap();
+    edgeMap = std::make_shared<UniqueEdgeMap>();
+
+    for(auto pair: *g.nodeMap.get()) {
+        NodeTypePtr ptr = pair.second;
+        NodeTypePtr ptrCopy((NodeType*)ptr->clone());
+        addNode(ptrCopy);
+    }
+
+    for(auto pair: *g.edgeMap.get()) {
+        EdgeTypePtr ptr = pair.second;
+        EdgeTypePtr ptrCopy((EdgeType*)ptr->clone());
+        addEdge(ptrCopy);
+    }
 }
 
 template <class NodeType, class EdgeType>
@@ -147,7 +162,7 @@ Graph<NodeType,EdgeType>::~Graph() {
  */
 template <class NodeType, class EdgeType>
 void Graph<NodeType,EdgeType>::clear() {
-	edgeList->clear();
+    edgeMap->clear();
 	nodeMap->clear();
 	leavingEdges->clear();
 	arrivingEdges->clear();
@@ -172,28 +187,24 @@ bool Graph<NodeType,EdgeType>::addNode(NodeTypePtr node) {
 }
 
 /**
- * Adds a new edge to the graph if the nodes that the edge connects does not exists and an equal(same attributes) edge
- * is not already in the graph
+ * Adds a new edge to the graph, does not checked for errors
  *
  * @param edge pointer to edge to insert
- * @return true if successful, false otherwise
  */
 template <class NodeType, class EdgeType>
-bool Graph<NodeType,EdgeType>::addEdge(EdgeTypePtr edge) {
-	bool vuelta = false;
+void Graph<NodeType,EdgeType>::addEdge(EdgeTypePtr edge) {
+    edgeMap->insert(std::make_pair(Utils::cantorParingFunction(edge->getIdSource(), edge->getIdTarget()),edge));
+    auto leavingIt = leavingEdges->find(edge->getIdSource());
+    if (leavingIt != leavingEdges->end()) {
+        EdgeVectorPtr vectorLeaving = leavingIt->second;
+        vectorLeaving->push_back(edge);
+    }
 
-	auto nodeSource = nodeMap->find(edge->getIdSource());
-	// if the two node that the edge connects exits
-	if ((nodeSource != nodeMap->end())
-			&& (nodeMap->find(edge->getIdTarget()) != nodeMap->end())) {
-		edgeList->push_back(edge);
-		EdgeVectorPtr vectorLeaving = leavingEdges->find(edge->getIdSource())->second;
-		vectorLeaving->push_back(edge);
-		EdgeVectorPtr vectorArriving = arrivingEdges->find(edge->getIdTarget())->second;
-		vectorArriving->push_back(edge);
-		vuelta = true;
-	}
-	return vuelta;
+    auto arrivingIt = arrivingEdges->find(edge->getIdTarget());
+    if (arrivingIt != arrivingEdges->end()) {
+        EdgeVectorPtr vectorArriving = arrivingIt->second;
+        vectorArriving->push_back(edge);
+    }
 }
 
 /**
@@ -214,6 +225,24 @@ typename Graph<NodeType, EdgeType>::NodeTypePtr Graph<NodeType,EdgeType>::getNod
 }
 
 /**
+ * Returns the first edge that joins the nodes
+ *
+ * @param idSource node id wich the edge points out
+ * @param idTarget node id wich the edge points to
+ *
+ * @return a pointer to the edge object if exists, NULL otherwise
+ */
+template <class NodeType, class EdgeType>
+typename Graph<NodeType, EdgeType>::EdgeTypePtr Graph<NodeType,EdgeType>::getEdge(int idSource, int idTarget) {
+        EdgeTypePtr edge = NULL;
+        auto it = edgeMap->find(Utils::cantorParingFunction(idSource, idTarget));
+        if (it != edgeMap->end()) {
+            return it->second;
+        }
+        return edge;
+}
+
+/**
  * Returns all the neighbors of the node with idSource
  *
  * @param idSource ID of the node to get the neighbors from
@@ -227,16 +256,6 @@ const typename Graph<NodeType, EdgeType>::EdgeVectorPtr Graph<NodeType,EdgeType>
 	auto it = leavingEdges->find(idSource);
 	if (it != leavingEdges->end()) {
 		vuelta = it->second;
-	}
-	return vuelta;
-}
-template <class NodeType, class EdgeType>
-const typename Graph<NodeType, EdgeType>::NodeVectorPtr Graph<NodeType,EdgeType>::getAllNodes() {
-	NodeVectorPtr vuelta = makeNodeVector();
-
-	for (auto it = nodeMap->begin();
-				it != nodeMap->end(); ++it) {
-		vuelta->push_back(it->second);
 	}
 	return vuelta;
 }
@@ -257,17 +276,16 @@ bool Graph<NodeType,EdgeType>::removeNode(int nodeID) {
 		nodeMap->erase(nodeID);
 
 		//remove all the edges that use idNode
-		auto it = edgeList->begin();
-		while (it != edgeList->end()) {
-			EdgeTypePtr actual = *it;
-			if ((actual->getIdSource() == nodeID)
-					|| (actual->getIdTarget() == nodeID)) {
-                it = edgeList->erase(it);
-				//delete actual;
-			} else {
-				++it;
-			}
-		}
+        for(auto it = edgeMap->begin(); it != edgeMap->end(); ) {
+            EdgeTypePtr actual = it->second;
+            if ((actual->getIdSource() == nodeId) ||
+                (actual->getIdTarget() == nodeId))
+            {
+                it = edgeMap->erase(it);
+            } else {
+                ++it;
+            }
+        }
 
 		//remove neighbor from the list
 		leavingEdges->erase(nodeID);
@@ -283,17 +301,37 @@ bool Graph<NodeType,EdgeType>::removeNode(int nodeID) {
  * @param edge object to be compared for removing from the vector
  */
 template<class NodeType, class EdgeType>
-void Graph<NodeType, EdgeType>::removeEdge(const EdgeType & edge) {
-	auto it = edgeList->begin();
-	while (it != edgeList->end()) {
-		EdgeTypePtr actual = *it;
-		if (actual->equals(edge)) {
-            it = edgeList->erase(it);
-			//delete actual;
-		} else {
-			++it;
-		}
-	}
+void Graph<NodeType, EdgeType>::removeEdge(EdgeType & edge) {
+    auto it_map = edgeMap->find(Utils::cantorParingFunction(edge.getIdSource(), edge.getIdTarget()));
+    if (it_map != edgeMap->end()) {
+        edgeMap->erase(it_map);
+    }
+
+    auto it_lea = leavingEdges->find(edge.getIdSource());
+    if (it_lea != leavingEdges->end()) {
+        EdgeVectorPtr edges = it_lea->second;
+        for(auto it = edges->begin(); it != edges->end();) {
+            EdgeTypePtr actual = *it;
+            if (actual->getIdTarget() == edge.getIdTarget()) {
+                it = edges->erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    auto it_arr = arrivingEdges->find(edge.getIdSource());
+    if (it_arr != arrivingEdges->end()) {
+        EdgeVectorPtr edges = it_arr->second;
+        for(auto it = edges->begin(); it != edges->end();) {
+            EdgeTypePtr actual = *it;
+            if (actual->getIdTarget() == edge.getIdTarget()) {
+                it = edges->erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
 }
 
 /**
@@ -318,9 +356,8 @@ bool Graph<NodeType,EdgeType>::saveGraph(const string& filename) throw (std::run
 		}
 
 		// writing the edges...
-		for (auto it = edgeList->begin();
-				it != edgeList->end(); ++it) {
-			EdgeTypePtr actual = *it;
+        for (auto it = edgeMap->begin(); it != edgeMap->end(); ++it) {
+            EdgeTypePtr actual = it->second;
 			myfile << actual->toText() << endl;
 		}
 		myfile << "}";
@@ -418,7 +455,7 @@ void Graph<NodeType, EdgeType>::calculateSubgraphs() {
 	for (auto it = temp_color_nodeMap.begin(); it != temp_color_nodeMap.end(); ++it) {
 		subGraphs->push_back(it->second);
 	}
-}
+}*/
 
 template<class NodeType, class EdgeType>
 string Graph<NodeType, EdgeType>::toString() {
@@ -433,28 +470,18 @@ string Graph<NodeType, EdgeType>::toString() {
 	}
 
 	//print the edges
-	for (auto it = edgeList->begin();
-			it != edgeList->end(); ++it) {
-		EdgeTypePtr actual = *it;
+    for (auto it = edgeMap->begin();it != edgeMap->end(); ++it) {
+        EdgeTypePtr actual = it->second;
 		myfile << actual->toText();
 	}
 
 	myfile << "}";
 	return myfile.str();
-}*/
+}
 
 template<class NodeType, class EdgeType>
 bool Graph<NodeType, EdgeType>::areConnected(int idSource, int idTarget) {
-	bool vuelta = false;
-	const EdgeVectorPtr neighbors = getLeavingEdges(idSource);
-
-	auto it = neighbors->begin();
-	while (!vuelta && (it != neighbors->end())) {
-		EdgeTypePtr cast = *it;
-		vuelta = (cast->getIdTarget() == idTarget);
-		++it;
-	}
-	return vuelta;
+    return (edgeMap->find(Utils::cantorParingFunction(idSource, idTarget)) != edgeMap->end());
 }
 
 template<class NodeType, class EdgeType>
@@ -475,11 +502,6 @@ typename Graph<NodeType, EdgeType>::NodeMapPtr Graph<NodeType, EdgeType>::makeNo
 template<class NodeType, class EdgeType>
 typename Graph<NodeType, EdgeType>::EdgeMapPtr Graph<NodeType, EdgeType>::makeEdgeMap() {
 	return std::make_shared<EdgeMap>();
-}
-
-template<class NodeType, class EdgeType>
-typename Graph<NodeType, EdgeType>::SubGraphPtr Graph<NodeType, EdgeType>::makeSubGraph() {
-	return std::make_shared<SubGraph>();
 }
 
 #endif /* SRC_GRAPH_GRAPH_H_ */

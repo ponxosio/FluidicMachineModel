@@ -51,21 +51,25 @@ void Sequence::reset() {
     actualValue = startValue;
 }
 
-bool Sequence::hasEnded() {
-    return (actualValue > endValue);
-}
+bool Sequence::advanceSequence() throw(std::runtime_error) {
+    bool advanced = false;
 
-int Sequence::nextValue() throw(std::runtime_error) {
-    if (!hasEnded()) {
+    if (actualValue <= endValue) {
+        actualValue++;
+
         auto it = forbiddenValuesSet.find(actualValue);
-        while(it != forbiddenValuesSet.end()) {
+        while((actualValue <= endValue) &&
+              (it != forbiddenValuesSet.end()))
+        {
             actualValue++;
             it = forbiddenValuesSet.find(actualValue);
         }
-        return actualValue++;
-    } else {
-        throw(std::runtime_error("trying to get next value from a finished sequence"));
+
+        if(actualValue <= endValue) {
+            advanced = true;
+        }
     }
+    return advanced;
 }
 
 void Sequence::loadSequence(const std::set<int> & valuesOfSequence) throw(std::invalid_argument) {
@@ -77,10 +81,12 @@ void Sequence::loadSequence(const std::set<int> & valuesOfSequence) throw(std::i
 
         int previousValue = startValue;
         for (; it != valuesOfSequence.end(); ++it) {
-            while (*it > (previousValue + 1)) {
-                forbiddenValuesSet.insert(previousValue);
+            int sequenceActualValue = *it;
+            while (sequenceActualValue > (previousValue + 1)) {
                 previousValue++;
+                forbiddenValuesSet.insert(previousValue);
             }
+             previousValue++;
         }
         endValue = previousValue;
     } else {

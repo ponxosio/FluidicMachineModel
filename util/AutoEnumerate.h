@@ -14,6 +14,7 @@
 class AutoEnumerate {
 public:
 	AutoEnumerate();
+    AutoEnumerate(const AutoEnumerate & e);
 	virtual ~AutoEnumerate();
 
 	/**

@@ -5,7 +5,9 @@
 # include <unordered_map>
 # include <stdexcept>
 
-class PluginConfiguration
+#include "fluidicmachinemodel_global.h"
+
+class PLUGINCONFIGURATION_EXPORT PluginConfiguration
 {
 public:
     PluginConfiguration();

@@ -13,16 +13,21 @@ ValveNode::ValveNode(int idNode, int numPins, const TruthTable & truthTable, std
     if(valveRouteFunction->getAceptedOp() != route) {
         throw(std::invalid_argument("ValveNode's valveRouteFunction must be capable of route"));
     }
-    this->actualPosition = 0;
-    copyTruthTable(truthTable);
 
+    try {
+        checkTruthTableFormat(truthTable);
+        this->actualPosition = truthTable.begin()->first;
+        copyTruthTable(truthTable);
+    } catch (std::invalid_argument & e) {
+        throw(std::invalid_argument(std::string(e.what())));
+    }
 }
 
 ValveNode::~ValveNode() {
 
 }
 
-const std::vector<std::vector<int>> & ValveNode::getConnectedPins(int position) throw (std::invalid_argument) {
+const std::vector<std::unordered_set<int>> & ValveNode::getConnectedPins(int position) throw (std::invalid_argument) {
     auto it = truthTable.find(position);
     if (it != truthTable.end()) {
         return it->second;
@@ -31,24 +36,44 @@ const std::vector<std::vector<int>> & ValveNode::getConnectedPins(int position) 
     }
 }
 
-std::vector<int> ValveNode::getValvePossibleValues() {
-    std::vector<int> possibleValues;
+std::set<int> ValveNode::getValvePossibleValues() {
+    std::set<int> possibleValues;
     for(const auto it: truthTable) {
-        possibleValues.push_back(it.first);
+        possibleValues.insert(it.first);
     }
-    std::sort(possibleValues.begin(), possibleValues.end());
     return possibleValues;
 }
 
 void ValveNode::copyTruthTable(const TruthTable & table) {
     for (auto it = table.begin(); it != table.end(); ++it) {
         int position = it->first;
-        std::vector<std::vector<int>> pins;
+        const std::vector<std::unordered_set<int>> & connectedPins = it->second;
 
-        for (auto itvalue = it->second.begin(); itvalue != it->second.end(); ++it) {
-            std::vector<int> connectPinsVector(*itvalue);
+        std::vector<std::unordered_set<int>> pins;
+        for (auto itvalue = connectedPins.begin(); itvalue != connectedPins.end(); ++itvalue) {
+            std::unordered_set<int> connectPinsVector(*itvalue);
             pins.push_back(connectPinsVector);
         }
         truthTable.insert(std::make_pair(position, pins));
+    }
+}
+
+void ValveNode::checkTruthTableFormat(const TruthTable & table) throw(std::invalid_argument) {
+    if (table.empty()) {
+        throw(std::invalid_argument("Empty Truth Table"));
+    }
+
+    for (const auto & pair: table) {
+        int positionNum = pair.first;
+        const std::vector<std::unordered_set<int>> & connectedPinsVector = pair.second;
+
+        for (int i = 0; i < connectedPinsVector.size(); i++) {
+            const std::unordered_set<int> & connectedPins = connectedPinsVector[i];
+            if (connectedPins.size() < 2) {
+                throw(std::invalid_argument("Position: " + std::to_string(positionNum) +
+                                            ", connectedPins combination:" + std::to_string(i) +
+                                            " must has at least 2 pins to connect and has " + std::to_string(connectedPins.size())));
+            }
+        }
     }
 }

@@ -19,7 +19,7 @@ public:
     virtual void stackNumber(int value) = 0;
     virtual void stackArithmeticBinaryOperation(int arithmeticOp) = 0;
     virtual void stackArithmeticUnaryOperation(int unaryOp) = 0;
-    virtual void stackEquality() = 0;
+    virtual void stackEquality(int equalityOP) = 0;
     virtual void stackBooleanConjuction(int booleanOp) = 0;
     virtual void stackVarDomain() = 0;
 };

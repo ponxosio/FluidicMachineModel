@@ -18,6 +18,7 @@ public:
     virtual ~FluidicMachineNode();
 
     void connectToPin(int pin, std::shared_ptr<TubeEdge> edge) throw (std::invalid_argument);
+    std::tuple<int,int> getTubeIdConnectedToPin(int id) throw (std::invalid_argument);
 
     bool canDoOperations(unsigned long mask);
     double doOperation(OperationType op, int nargs, ...) throw (std::invalid_argument);
@@ -27,9 +28,11 @@ public:
     void setFactory(std::shared_ptr<PluginAbstractFactory> factory);
     void setFactory(OperationType op, std::shared_ptr<PluginAbstractFactory> factory) throw(std::invalid_argument);
 
+    inline virtual Node* clone() = 0;
+
 protected:
     int numberOfPins;
-    std::unordered_map<int,std::shared_ptr<TubeEdge>> pinConnectionMap;
+    std::unordered_map<int,std::tuple<int,int>> pinConnectionMap;
     FunctionSet availableFunctions;
 };
 

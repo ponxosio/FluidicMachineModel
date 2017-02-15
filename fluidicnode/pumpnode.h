@@ -6,32 +6,28 @@
 #include "fluidicnode/fluidicmachinenode.h"
 #include "fluidicnode/functions/function.h"
 
-typedef enum PumpType_ {
-    unknow,
-    unidirectional,
-    bidirectional
-} PumpType;
-
-typedef enum FlowDirection_ {
-    off,
-    upstream,
-    downstream
-} FlowDirection;
-
 class PumpNode : public FluidicMachineNode
 {
 public:
+    typedef enum PumpType_ {
+        unknow,
+        unidirectional,
+        bidirectional
+    } PumpType;
+
     PumpNode(const PumpNode & node);
-    PumpNode(int idNode, PumpType type, std::shared_ptr<Function> pumpFunction);
+    PumpNode(int idNode, int numPins, PumpType type, std::shared_ptr<Function> pumpFunction) throw (std::invalid_argument);
     virtual ~PumpNode();
 
     //getters & setters
     PumpType getType();
-    FlowDirection getFlowDirection();
+
+    inline virtual Node* clone() {
+        return new PumpNode(*this);
+    }
 
 protected:
     PumpType type;
-    FlowDirection flowDirection;
 };
 
 #endif // PUMPNODE_H
