@@ -189,7 +189,11 @@ std::shared_ptr<Predicate> StatePredicateGenerator::generatePredicateSameRateTub
 }
 
 std::shared_ptr<Predicate> StatePredicateGenerator::generatePredicateCloseContainer(int nodeId, std::shared_ptr<ArithmeticOperable> arrivingSum) {
-    return calculator->createEquality(VariableNominator::getContainerVarName(nodeId), arrivingSum);
+    if (arrivingSum == NULL) {
+        return calculator->createEquality(VariableNominator::getContainerVarName(nodeId), calculator->getNumber(0));
+    } else {
+        return calculator->createEquality(VariableNominator::getContainerVarName(nodeId), arrivingSum);
+    }
 }
 
 std::shared_ptr<Predicate> StatePredicateGenerator::generatePredicateOpenContainer(int nodeId, std::shared_ptr<MachineGraph> component) {

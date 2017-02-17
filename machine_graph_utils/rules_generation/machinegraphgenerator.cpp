@@ -250,7 +250,7 @@ void MachineGraphGenerator::setValve(int valveId, short int state, std::shared_p
     }
 }
 
-bool MachineGraphGenerator::isValidGraph(std::shared_ptr<MachineGraph> graph) {
+bool MachineGraphGenerator::isValidGraph(const std::shared_ptr<MachineGraph> & graph) {
     bool valid = (graph != nullptr);
     if (valid) {
         valid = false;
@@ -262,7 +262,40 @@ bool MachineGraphGenerator::isValidGraph(std::shared_ptr<MachineGraph> graph) {
     return valid;
 }
 
-bool MachineGraphGenerator::isValidConnectedComponent(std::shared_ptr<MachineGraph> graph) {
+bool MachineGraphGenerator::canOpenContainersConnect(const std::shared_ptr<MachineGraph> & graph_original) {
+    int numValidOpenContainers = 0;
+
+    const std::unordered_set<int> & openContainers = graph_original->getOpenContainersIdsSet();
+    for(auto it = openContainers.begin(); numValidOpenContainers < 2 && it != openContainers.end(); ++it) {
+        bool hasOpenTube = false;
+        const MachineGraph::GraphType::EdgeVectorPtr & leaving = graph_original->getLeavingTubes(*it);
+
+        auto leavingIt = leaving->begin();
+        while(!hasOpenTube &&
+              leavingIt != leaving->end())
+        {
+            hasOpenTube = (*leavingIt)->isCutted();
+            ++leavingIt;
+        }
+
+        const MachineGraph::GraphType::EdgeVectorPtr & arriving = graph_original->getArrivingTubes(*it);
+
+        auto arrivingIt = arriving->begin();
+        while(!hasOpenTube &&
+              arrivingIt != arriving->end())
+        {
+            hasOpenTube = (*arrivingIt)->isCutted();
+            ++arrivingIt;
+        }
+
+        if (hasOpenTube) {
+            numValidOpenContainers++;
+        }
+    }
+    return (numValidOpenContainers >= 2);
+}
+
+bool MachineGraphGenerator::isValidConnectedComponent(const std::shared_ptr<MachineGraph> & graph) {
     bool valid = (graph->getOpenContainersIdsSet().size() >= 2);
     if (valid) {
         for (auto it = graph->getCloseContainersIdsSet().begin(); valid && it != graph->getCloseContainersIdsSet().end(); ++it) {
