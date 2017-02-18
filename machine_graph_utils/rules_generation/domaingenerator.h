@@ -31,7 +31,7 @@ protected:
     std::shared_ptr<VariableDomain> generateDomainPumpRate(int id);
     std::shared_ptr<VariableDomain> generateDomainValve(int id) throw(std::invalid_argument);
     std::shared_ptr<VariableDomain> generateDomainCloseContainer(int id);
-    std::shared_ptr<VariableDomain> generateDomainOpenContainer(int id) throw(std::invalid_argument);
+    std::shared_ptr<VariableDomain> generateDomainOpenContainer(int id);
     std::shared_ptr<VariableDomain> generateDomainTube(int idSource, int idTarget);
 
     std::set<int> getValvePossibleValues(int id) throw(std::invalid_argument);
