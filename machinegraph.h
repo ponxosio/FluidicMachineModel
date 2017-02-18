@@ -61,6 +61,8 @@ public:
     std::shared_ptr<PumpNode> getPump(int id) throw(std::invalid_argument);
     std::shared_ptr<ValveNode> getValve(int id) throw(std::invalid_argument);
 
+    short int getOpenContainerLiquidId(int idOpenContainer) throw (std::invalid_argument);
+
     const std::vector<std::shared_ptr<MachineGraph>> & getConnectedComponents();
 
     void updatePluginFactory(std::shared_ptr<PluginAbstractFactory> factory);

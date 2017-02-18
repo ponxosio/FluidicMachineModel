@@ -361,6 +361,15 @@ std::shared_ptr<ValveNode> MachineGraph::getValve(int id) throw(std::invalid_arg
     }
 }
 
+short int MachineGraph::getOpenContainerLiquidId(int idOpenContainer) throw (std::invalid_argument) {
+    auto finded = openContainerLiquidIdMap.find(idOpenContainer);
+    if (finded != openContainerLiquidIdMap.end()) {
+        return finded->second;
+    } else {
+        throw(std::invalid_argument(std::to_string(idOpenContainer) + " is not an open container"));
+    }
+}
+
 void MachineGraph::updatePluginFactory(std::shared_ptr<PluginAbstractFactory> factory) {
     GraphType::NodeMapPtr nodes = graphPtr->getAllNodes();
     for (auto pair: *nodes.get()) {

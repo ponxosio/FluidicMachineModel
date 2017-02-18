@@ -54,8 +54,9 @@ protected:
 
     void fillActualStateGeneratedVector(const std::vector<short int> & actualState);
 
-    bool isValidGraph(std::shared_ptr<MachineGraph> graph_original);
-    bool isValidConnectedComponent(std::shared_ptr<MachineGraph> graph_original);
+    bool isValidGraph(const std::shared_ptr<MachineGraph> & graph_original);
+    bool canOpenContainersConnect(const std::shared_ptr<MachineGraph> & graph_original);
+    bool isValidConnectedComponent(const std::shared_ptr<MachineGraph> & graph_original);
     void countLeavingArringEdgesVector(const MachineGraph::GraphType::EdgeVectorPtr & tubesToCheck,
                                        bool arriving,
                                        int & numArriving,

@@ -144,7 +144,7 @@ std::shared_ptr<VariableDomain> DomainGenerator::generateDomainPumpRate(int id) 
 }
 
 std::shared_ptr<VariableDomain> DomainGenerator::generateDomainCloseContainer(int id) {
-    int maxLiquidIdValue = (1 << (graph->getNumOpenContainers()));
+    int maxLiquidIdValue = (1 << (graph->getNumOpenContainers())) - 1;
     std::vector<long long> possibleValues;
     possibleValues.push_back(0);
 
@@ -163,7 +163,7 @@ std::shared_ptr<VariableDomain> DomainGenerator::generateDomainCloseContainer(in
 }
 
 std::shared_ptr<VariableDomain> DomainGenerator::generateDomainTube(int idSource, int idTarget) {
-    int maxLiquidIdValue = (1 << (graph->getNumOpenContainers()));
+    int maxLiquidIdValue = (1 << (graph->getNumOpenContainers())) - 1;
     std::vector<long long> possibleValues;
     possibleValues.push_back(0);
 
@@ -181,41 +181,21 @@ std::shared_ptr<VariableDomain> DomainGenerator::generateDomainTube(int idSource
     return std::make_shared<VariableDomain>(var, domain);
 }
 
-std::shared_ptr<VariableDomain> DomainGenerator::generateDomainOpenContainer(int id) throw(std::invalid_argument) {
-    /*auto it = graph->getOpenContainerLiquidIdMap().find(id);
-    if (it != graph->getOpenContainerLiquidIdMap().end()) {
-        std::vector<long long> possibleValues;
-        int maxLiquidIdValue = (1 << (graph->getNumOpenContainers()));
+std::shared_ptr<VariableDomain> DomainGenerator::generateDomainOpenContainer(int id) {
+    int liquidId = graph->getOpenContainerLiquidId(id);
+    int mask = 1 << liquidId;
+    int maxLiquidIdValue = (1 << (graph->getNumOpenContainers())) - 1;
 
-        long long myLiquidId = ((long long)1) << (it->second);
-        possibleValues.push_back(0);
-        possibleValues.push_back(myLiquidId*calculator->powerValue + 1);
-        possibleValues.push_back(myLiquidId*calculator->powerValue + (calculator->powerValue - 1));
-        possibleValues.push_back(-myLiquidId*calculator->powerValue - 1);
-        possibleValues.push_back(-myLiquidId*calculator->powerValue - (calculator->powerValue - 1));
-
-        int actual2power = 4;
-        for(int i = 3; i < maxLiquidIdValue; i++) {
-            if ((actual2power % i) == 0) {
-                actual2power *= 2;
-            } else {
-                possibleValues.push_back(i*calculator->powerValue + 1);
-                possibleValues.push_back(i*calculator->powerValue + (calculator->powerValue - 1));
-                possibleValues.push_back(-i*calculator->powerValue - 1);
-                possibleValues.push_back(-i*calculator->powerValue - (calculator->powerValue - 1));
-            }
-        }
-        std::sort(possibleValues.begin(), possibleValues.end());*/
-
-    int maxLiquidIdValue = (1 << (graph->getNumOpenContainers()));
     std::vector<long long> possibleValues;
     possibleValues.push_back(0);
 
     for(int i = 1; i < maxLiquidIdValue; i++) {
-        possibleValues.push_back(i*calculator->powerValue + 1);
-        possibleValues.push_back(i*calculator->powerValue + (calculator->powerValue - 1));
-        possibleValues.push_back(-i*calculator->powerValue - 1);
-        possibleValues.push_back(-i*calculator->powerValue - (calculator->powerValue - 1));
+        if (((i & mask) == 0) || (i == mask)) {
+            possibleValues.push_back(i*calculator->powerValue + 1);
+            possibleValues.push_back(i*calculator->powerValue + (calculator->powerValue - 1));
+            possibleValues.push_back(-i*calculator->powerValue - 1);
+            possibleValues.push_back(-i*calculator->powerValue - (calculator->powerValue - 1));
+        }
     }
     std::sort(possibleValues.begin(), possibleValues.end());
 
@@ -223,7 +203,4 @@ std::shared_ptr<VariableDomain> DomainGenerator::generateDomainOpenContainer(int
     std::vector<VariableDomain::DomainTuple> domain = generateDomainForValues(possibleValues);
 
     return std::make_shared<VariableDomain>(var, domain);
-    /*} else {
-    throw(std::invalid_argument(std::to_string(id) + " is not found on the open containers map"));
-    }*/
 }
