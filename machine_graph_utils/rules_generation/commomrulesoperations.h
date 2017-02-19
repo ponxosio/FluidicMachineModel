@@ -23,6 +23,7 @@ class CommomRulesOperations
     friend class DomainGenerator;
     friend class GraphRulesGenerator;
     friend class StatePredicateGenerator;
+    friend class ShortStatePredicateGenerator;
 
 public:
     virtual ~CommomRulesOperations();
@@ -76,11 +77,20 @@ protected:
     inline std::shared_ptr<Predicate> createBigger(const std::string & name, int value) {
         return std::make_shared<Equality>(getVariable(name), Equality::bigger, getNumber(value));
     }
+    inline std::shared_ptr<Predicate> createBigger(std::shared_ptr<ArithmeticOperable> op1, std::shared_ptr<ArithmeticOperable> op2) {
+        return std::make_shared<Equality>(op1, Equality::bigger, op2);
+    }
     inline std::shared_ptr<Predicate> createLesser(const std::string & name, int value) {
         return std::make_shared<Equality>(getVariable(name), Equality::lesser, getNumber(value));
     }
+    inline std::shared_ptr<Predicate> createLesser(std::shared_ptr<ArithmeticOperable> op1, std::shared_ptr<ArithmeticOperable> op2) {
+        return std::make_shared<Equality>(op1, Equality::lesser, op2);
+    }
     inline std::shared_ptr<Predicate> createNotEqual(const std::string & name, int value) {
         return std::make_shared<Equality>(getVariable(name), Equality::not_equal, getNumber(value));
+    }
+    inline std::shared_ptr<Predicate> createNotEqual(std::shared_ptr<ArithmeticOperable> op1, std::shared_ptr<ArithmeticOperable> op2) {
+        return std::make_shared<Equality>(op1, Equality::not_equal, op2);
     }
 };
 
