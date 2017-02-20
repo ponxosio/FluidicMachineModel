@@ -26,6 +26,16 @@ CommomRulesOperations::~CommomRulesOperations() {
     this->one.reset();
 }
 
+std::shared_ptr<ArithmeticOperable> CommomRulesOperations::changeSign(std::shared_ptr<ArithmeticOperable> op) {
+    if (op == NULL) {
+        return NULL;
+    } else {
+        std::shared_ptr<ArithmeticOperable> opInverted = absoluteValue(op);
+        opInverted = multiplyOperables(getNumber(-1), opInverted);
+        return opInverted;
+    }
+}
+
 std::shared_ptr<ArithmeticOperable> CommomRulesOperations::addVariables(std::shared_ptr<Variable> var1, std::shared_ptr<Variable> var2) {
     std::shared_ptr<ArithmeticOperable> rate = calculateRate(var1);
     std::shared_ptr<ArithmeticOperable> main = std::make_shared<BinaryOperation>(calculateId(var1), BinaryOperation::add, calculateId(var2));
@@ -50,13 +60,13 @@ std::shared_ptr<ArithmeticOperable> CommomRulesOperations::addVariables(const st
 }
 
 std::shared_ptr<ArithmeticOperable> CommomRulesOperations::calculateRate(std::shared_ptr<Variable> variable) {
-    std::shared_ptr<ArithmeticOperable> absVar = std::make_shared<UnaryOperation>(variable, absolute_value);
+    std::shared_ptr<ArithmeticOperable> absVar = std::make_shared<UnaryOperation>(variable, UnaryOperation::absolute_value);
     std::shared_ptr<ArithmeticOperable> powerNum = std::make_shared<IntegerNumber>(powerValue);
     return std::make_shared<BinaryOperation>(absVar, BinaryOperation::module, powerNum);
 }
 
 std::shared_ptr<ArithmeticOperable> CommomRulesOperations::calculateId(std::shared_ptr<Variable> variable) {
-    std::shared_ptr<ArithmeticOperable> absVar = std::make_shared<UnaryOperation>(variable, absolute_value);
+    std::shared_ptr<ArithmeticOperable> absVar = std::make_shared<UnaryOperation>(variable, UnaryOperation::absolute_value);
     std::shared_ptr<ArithmeticOperable> division = std::make_shared<BinaryOperation>(absVar, BinaryOperation::divide, power);
     return std::make_shared<BinaryOperation>(division, BinaryOperation::multiply, power);
 }
@@ -123,5 +133,25 @@ std::shared_ptr<ArithmeticOperable> CommomRulesOperations::addOperables(std::sha
         return std::make_shared<BinaryOperation>(op1, BinaryOperation::add, op2);
     } else {
         return NULL;
+    }
+}
+
+std::shared_ptr<ArithmeticOperable> CommomRulesOperations::multiplyOperables(std::shared_ptr<ArithmeticOperable> op1, std::shared_ptr<ArithmeticOperable> op2) {
+    if (op1 != NULL && op2 == NULL) {
+        return op1;
+    } else if (op1 == NULL && op2 != NULL) {
+        return op2;
+    } else if (op1 != NULL && op2 != NULL) {
+        return std::make_shared<BinaryOperation>(op1, BinaryOperation::multiply, op2);
+    } else {
+        return NULL;
+    }
+}
+
+std::shared_ptr<ArithmeticOperable> CommomRulesOperations::absoluteValue(std::shared_ptr<ArithmeticOperable> op) {
+    if (op == NULL) {
+        return NULL;
+    } else {
+        return std::make_shared<UnaryOperation>(op, UnaryOperation::absolute_value);
     }
 }

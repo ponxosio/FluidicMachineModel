@@ -44,6 +44,8 @@ protected:
 
     CommomRulesOperations(short int ratePrecisionInteger,  short int ratePrecisionDecimal);
 
+    std::shared_ptr<ArithmeticOperable> changeSign(std::shared_ptr<ArithmeticOperable> op);
+
     std::shared_ptr<ArithmeticOperable> addVariables(std::shared_ptr<Variable> var1, std::shared_ptr<Variable> var2) throw(std::invalid_argument);
     std::shared_ptr<ArithmeticOperable> addVariables(const std::vector<std::shared_ptr<Variable>> & variables) throw(std::invalid_argument);
     std::shared_ptr<ArithmeticOperable> calculateRate(std::shared_ptr<Variable> variable);
@@ -53,6 +55,9 @@ protected:
     std::shared_ptr<IntegerNumber> getNumber(long long value);
 
     std::shared_ptr<ArithmeticOperable> addOperables(std::shared_ptr<ArithmeticOperable> op1, std::shared_ptr<ArithmeticOperable> op2);
+    std::shared_ptr<ArithmeticOperable> multiplyOperables(std::shared_ptr<ArithmeticOperable> op1, std::shared_ptr<ArithmeticOperable> op2);
+    std::shared_ptr<ArithmeticOperable> absoluteValue(std::shared_ptr<ArithmeticOperable> op);
+
     std::shared_ptr<Predicate> andPredicates(std::shared_ptr<Predicate> pred1, std::shared_ptr<Predicate> pred2);
     std::shared_ptr<Predicate> orPredicates(std::shared_ptr<Predicate> pred1, std::shared_ptr<Predicate> pred2);
 

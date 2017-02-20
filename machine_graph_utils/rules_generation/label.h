@@ -55,6 +55,10 @@ public:
         return ((mask & labelSet.to_ulong()) == mask);
     }
 
+    inline unsigned long getMask() {
+        return (labelSet.to_ullong());
+    }
+
     inline std::string toStr() {
         return labelSet.to_string();
     }
