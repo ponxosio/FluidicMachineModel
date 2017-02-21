@@ -3,6 +3,8 @@
 MachineGraph::MachineGraph() {
     graphPtr = std::make_shared<GraphType>();
     connectedComponentsUpdated = true;
+
+    this->luquidIdserie.reset(1);
 }
 
 MachineGraph::MachineGraph(const MachineGraph & mg) :

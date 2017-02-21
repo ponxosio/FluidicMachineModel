@@ -34,13 +34,15 @@ public:
 protected:
     std::shared_ptr<MachineGraph> graph;
     std::shared_ptr<CommomRulesOperations> calculator;
-    std::shared_ptr<Rule> rules;
+    std::shared_ptr<Rule> rule;
 
     ShortStatePredicateGenerator(std::shared_ptr<MachineGraph> graph, std::shared_ptr<CommomRulesOperations> calculator) throw (std::invalid_argument);
 
     void analizeGraph();
 
     std::shared_ptr<Predicate> generatePredicateOpenContainer(int idOpenContainer) throw(std::invalid_argument);
+    std::shared_ptr<Predicate> generatePredicateOpenContainer_moreOneTubeLeaving(int idOpenContainer);
+    std::shared_ptr<Predicate> generatePredicateOpenContainer_moreOneTubeArriving(int idOpenContainer);
     std::shared_ptr<Predicate> generatePredicateOpenContainer_liquidId(int idOpenContainer);
     std::shared_ptr<Predicate> generatePredicateOpenContainer_arrivingLeavingCombination(int idOpenContainer,
                                                                                          bool arriving,
@@ -61,6 +63,11 @@ protected:
                                                                const MachineGraph::GraphType::EdgeVector & tubesLeaving);
 
     std::shared_ptr<Predicate> generatePredicateValve(int valveId);
+    std::shared_ptr<Predicate> generatePredicateValve_processConnectedPins(int valveId,
+                                                                           int possition,
+                                                                           std::shared_ptr<ValveNode> valvePtr,
+                                                                           LabelTypeTubeMap & arrivingMap,
+                                                                           LabelTypeTubeMap & leavingMap);
 
     std::shared_ptr<Predicate> makeNodeTubesCombinations(int nodeId,
                                                          bool makeContainerEq,
@@ -99,6 +106,7 @@ protected:
 
     bool hasLabel(Label::LabelType type, const LabelTypeTubeMap & labelMap, const MachineGraph::GraphType::EdgeVector & tubes);
 
+    LabelTypeTubeMap makeLabelMap(const MachineGraph::GraphType::EdgeVector & tubes, const Label & initValue);
     void separateLabelMap(const LabelTypeTubeMap & map,
                           Label::LabelType type,
                           MachineGraph::GraphType::EdgeVector & tubesType,

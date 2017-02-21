@@ -1,7 +1,6 @@
 #include "commomrulesoperations.h"
 #include "domaingenerator.h"
 #include "machine_graph_utils/graphrulesgenerator.h"
-#include "machine_graph_utils/rules_generation/statepredicategenerator.h"
 
 CommomRulesOperations::CommomRulesOperations(short int ratePrecisionInteger,  short int ratePrecisionDecimal)
 {
@@ -26,12 +25,21 @@ CommomRulesOperations::~CommomRulesOperations() {
     this->one.reset();
 }
 
-std::shared_ptr<ArithmeticOperable> CommomRulesOperations::changeSign(std::shared_ptr<ArithmeticOperable> op) {
+std::shared_ptr<ArithmeticOperable> CommomRulesOperations::changeSignAbs(std::shared_ptr<ArithmeticOperable> op) {
     if (op == NULL) {
         return NULL;
     } else {
         std::shared_ptr<ArithmeticOperable> opInverted = absoluteValue(op);
         opInverted = multiplyOperables(getNumber(-1), opInverted);
+        return opInverted;
+    }
+}
+
+std::shared_ptr<ArithmeticOperable> CommomRulesOperations::changeSign(std::shared_ptr<ArithmeticOperable> op) {
+    if (op == NULL) {
+        return NULL;
+    } else {
+        std::shared_ptr<ArithmeticOperable> opInverted = multiplyOperables(getNumber(-1), op);
         return opInverted;
     }
 }
@@ -69,6 +77,11 @@ std::shared_ptr<ArithmeticOperable> CommomRulesOperations::calculateId(std::shar
     std::shared_ptr<ArithmeticOperable> absVar = std::make_shared<UnaryOperation>(variable, UnaryOperation::absolute_value);
     std::shared_ptr<ArithmeticOperable> division = std::make_shared<BinaryOperation>(absVar, BinaryOperation::divide, power);
     return std::make_shared<BinaryOperation>(division, BinaryOperation::multiply, power);
+}
+
+std::shared_ptr<ArithmeticOperable> CommomRulesOperations::calculateIdNotPower(std::shared_ptr<Variable> variable) {
+    std::shared_ptr<ArithmeticOperable> absVar = std::make_shared<UnaryOperation>(variable, UnaryOperation::absolute_value);
+    return std::make_shared<BinaryOperation>(absVar, BinaryOperation::divide, power);
 }
 
 std::shared_ptr<Variable> CommomRulesOperations::getVariable(const std::string & name) {

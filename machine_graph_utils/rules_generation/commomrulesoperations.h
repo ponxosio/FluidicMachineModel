@@ -22,7 +22,6 @@ class CommomRulesOperations
 {
     friend class DomainGenerator;
     friend class GraphRulesGenerator;
-    friend class StatePredicateGenerator;
     friend class ShortStatePredicateGenerator;
 
 public:
@@ -44,12 +43,14 @@ protected:
 
     CommomRulesOperations(short int ratePrecisionInteger,  short int ratePrecisionDecimal);
 
+    std::shared_ptr<ArithmeticOperable> changeSignAbs(std::shared_ptr<ArithmeticOperable> op);
     std::shared_ptr<ArithmeticOperable> changeSign(std::shared_ptr<ArithmeticOperable> op);
 
     std::shared_ptr<ArithmeticOperable> addVariables(std::shared_ptr<Variable> var1, std::shared_ptr<Variable> var2) throw(std::invalid_argument);
     std::shared_ptr<ArithmeticOperable> addVariables(const std::vector<std::shared_ptr<Variable>> & variables) throw(std::invalid_argument);
     std::shared_ptr<ArithmeticOperable> calculateRate(std::shared_ptr<Variable> variable);
     std::shared_ptr<ArithmeticOperable> calculateId(std::shared_ptr<Variable> variable);
+    std::shared_ptr<ArithmeticOperable> calculateIdNotPower(std::shared_ptr<Variable> variable);
 
     std::shared_ptr<Variable> getVariable(const std::string & name);
     std::shared_ptr<IntegerNumber> getNumber(long long value);

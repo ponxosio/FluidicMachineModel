@@ -8,8 +8,11 @@
 #ifndef SRC_GRAPH_EDGE_H_
 #define SRC_GRAPH_EDGE_H_
 
+#include <memory>
 #include <string>
 #include  <stdexcept>
+
+#include "util/Utils.h"
 
 //cereal
 #include <cereal\cereal.hpp>
