@@ -32,6 +32,8 @@ public:
     virtual ~ShortStatePredicateGenerator();
 
 protected:
+    const static Label dummy;
+
     std::shared_ptr<MachineGraph> graph;
     std::shared_ptr<CommomRulesOperations> calculator;
     std::shared_ptr<Rule> rule;
@@ -67,18 +69,51 @@ protected:
                                                                            int possition,
                                                                            std::shared_ptr<ValveNode> valvePtr,
                                                                            LabelTypeTubeMap & arrivingMap,
-                                                                           LabelTypeTubeMap & leavingMap);
+                                                                           LabelTypeTubeMap & leavingMap) throw(std::invalid_argument);
 
     std::shared_ptr<Predicate> makeNodeTubesCombinations(int nodeId,
                                                          bool makeContainerEq,
                                                          const MachineGraph::GraphType::EdgeVector & tubesArriving,
-                                                         const MachineGraph::GraphType::EdgeVector & tubesLeaving);
-    std::shared_ptr<Predicate> makeNodeTubesCombinations_combinationNonZeros(int nodeId,
-                                                                             bool makeContainerEq,
-                                                                             const LabelTypeTubeMap & labelsArriving,
-                                                                             const LabelTypeTubeMap & labelsLeaving,
-                                                                             const MachineGraph::GraphType::EdgeVector & dummyArriving,
-                                                                             const MachineGraph::GraphType::EdgeVector & dummyLeaving);
+                                                         const MachineGraph::GraphType::EdgeVector & tubesLeaving) throw(std::invalid_argument);
+
+    std::shared_ptr<Predicate> makeNodeTubesCombinations_makeIteratorsLeaving(int nodeId,
+                                                                              bool makeContainerEq,
+                                                                              const MachineGraph::GraphType::EdgeVector & arrivingDummy,
+                                                                              const MachineGraph::GraphType::EdgeVector & leavingDummy,
+                                                                              const LabelTypeTubeMap & leavingMap);
+
+    std::shared_ptr<Predicate> makeNodeTubesCombinations_makeIteratorsBoth(int nodeId,
+                                                                           bool makeContainerEq,
+                                                                           const MachineGraph::GraphType::EdgeVector & arrivingDummy,
+                                                                           const LabelTypeTubeMap & arrivingMap,
+                                                                           const MachineGraph::GraphType::EdgeVector & leavingDummy,
+                                                                           const LabelTypeTubeMap & leavingMap);
+
+    std::shared_ptr<Predicate> makeNodeTubesCombinations_makeIteratorsArriving(int nodeId,
+                                                                               bool makeContainerEq,
+                                                                               const MachineGraph::GraphType::EdgeVector & arrivingDummy,
+                                                                               const MachineGraph::GraphType::EdgeVector & leavingDummy,
+                                                                               const LabelTypeTubeMap & arrivingMap);
+
+    std::shared_ptr<Predicate> makeNodeTubesCombinations_combinationNonZerosBoth(int nodeId,
+                                                                                 bool makeContainerEq,
+                                                                                 const LabelTypeTubeMap & labelsArriving,
+                                                                                 const LabelTypeTubeMap & labelsLeaving,
+                                                                                 const MachineGraph::GraphType::EdgeVector & dummyArriving,
+                                                                                 const MachineGraph::GraphType::EdgeVector & dummyLeaving);
+
+    std::shared_ptr<Predicate> makeNodeTubesCombinations_combinationNonZerosLeaving(int nodeId,
+                                                                                    bool makeContainerEq,
+                                                                                    const LabelTypeTubeMap & labelsLeaving,
+                                                                                    const MachineGraph::GraphType::EdgeVector & dummyArriving,
+                                                                                    const MachineGraph::GraphType::EdgeVector & dummyLeaving);
+
+    std::shared_ptr<Predicate> makeNodeTubesCombinations_combinationNonZerosArriving(int nodeId,
+                                                                                     bool makeContainerEq,
+                                                                                     const LabelTypeTubeMap & labelsArriving,
+                                                                                     const MachineGraph::GraphType::EdgeVector & dummyArriving,
+                                                                                     const MachineGraph::GraphType::EdgeVector & dummyLeaving);
+
     std::shared_ptr<Predicate> makeNodeTubesCombinations_processCombination(int nodeId,
                                                                             bool makeContainerEq,
                                                                             const MachineGraph::GraphType::EdgeVector & aDummyBigger,
