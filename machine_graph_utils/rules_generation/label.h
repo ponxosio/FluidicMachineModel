@@ -1,6 +1,7 @@
 #ifndef LABEL_H
 #define LABEL_H
 
+#include <cmath>
 #include <bitset>
 
 class Label {

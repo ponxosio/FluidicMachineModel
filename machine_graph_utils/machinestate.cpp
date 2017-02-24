@@ -195,7 +195,9 @@ const std::unordered_map<std::string, long long> & MachineState::getAllPumpsRate
     return pumpsRatesMap;
 }
 
-long long MachineState::getValvePosition(int id) {
+long long MachineState::getValvePosition(int id)
+    throw(std::invalid_argument)
+{
     std::string varName = VariableNominator::getValveVarName(id);
     auto it = valvesMap.find(varName);
 

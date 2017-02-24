@@ -641,8 +641,9 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::generatePredicateValve(
         MachineGraph::GraphType::EdgeVector aTubesZero;
         MachineGraph::GraphType::EdgeVector lTubesZero;
 
-        separateLabelMap(arrivingMap, Label::zero, aTubesZero, MachineGraph::GraphType::EdgeVector());
-        separateLabelMap(leavingMap, Label::zero, lTubesZero, MachineGraph::GraphType::EdgeVector());
+        MachineGraph::GraphType::EdgeVector empty;
+        separateLabelMap(arrivingMap, Label::zero, aTubesZero, empty);
+        separateLabelMap(leavingMap, Label::zero, lTubesZero, empty);
 
         std::shared_ptr<Predicate> valvePossitionEq = calculator->createEquality(VariableNominator::getValveVarName(valveId), possition);
 

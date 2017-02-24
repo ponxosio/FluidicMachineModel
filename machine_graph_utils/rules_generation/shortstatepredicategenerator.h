@@ -137,9 +137,11 @@ protected:
 
     void labelNodeArrivingLeavingSet(int node, bool arriving, LabelTypeTubeMap & labelMap);
     void labelTubeSet(bool arriving,const MachineGraph::GraphType::EdgeVector & tubes, LabelTypeTubeMap & labelMap);
-    Label labelTube(int nodeStart, int nodeAvoid) throw(std::invalid_argument);
+    Label labelTube(int nodeStart, int nodeAvoid);
 
-    bool hasLabel(Label::LabelType type, const LabelTypeTubeMap & labelMap, const MachineGraph::GraphType::EdgeVector & tubes);
+    bool hasLabel(Label::LabelType type,
+                  const LabelTypeTubeMap & labelMap,
+                  const MachineGraph::GraphType::EdgeVector & tubes) throw(std::invalid_argument);
 
     LabelTypeTubeMap makeLabelMap(const MachineGraph::GraphType::EdgeVector & tubes, const Label & initValue);
     void separateLabelMap(const LabelTypeTubeMap & map,
