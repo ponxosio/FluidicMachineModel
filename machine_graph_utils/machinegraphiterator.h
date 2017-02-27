@@ -15,7 +15,7 @@ public:
     MachineGraphIterator(int startNode, std::shared_ptr<MachineGraph> graph, const std::unordered_set<int> & nodesToAvoid);
     virtual ~MachineGraphIterator();
 
-    bool advance();
+    virtual bool advance();
 
     inline int getActualNode() {
         return actualNode;

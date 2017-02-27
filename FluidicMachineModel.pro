@@ -44,7 +44,8 @@ SOURCES += fluidicmachinemodel.cpp \
     machine_graph_utils/rules_generation/domaingenerator.cpp \
     machine_graph_utils/rules_generation/shortstatepredicategenerator.cpp \
     machine_graph_utils/rules_generation/labelcombinationsiterator.cpp \
-    machine_graph_utils/machinegraphiterator.cpp
+    machine_graph_utils/machinegraphiterator.cpp \
+    machine_graph_utils/machinegraphpressureiterator.cpp
 
 HEADERS += fluidicmachinemodel.h\
         fluidicmachinemodel_global.h \
@@ -97,7 +98,8 @@ HEADERS += fluidicmachinemodel.h\
     machine_graph_utils/rules_generation/shortstatepredicategenerator.h \
     machine_graph_utils/rules_generation/label.h \
     machine_graph_utils/rules_generation/labelcombinationsiterator.h \
-    machine_graph_utils/machinegraphiterator.h
+    machine_graph_utils/machinegraphiterator.h \
+    machine_graph_utils/machinegraphpressureiterator.h
 
 unix {
     target.path = /usr/lib

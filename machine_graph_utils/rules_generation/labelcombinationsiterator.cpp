@@ -1,6 +1,6 @@
 #include "labelcombinationsiterator.h"
 
-LabelCombinationsIterator::LabelCombinationsIterator(const LabelTypeTubeMap & labelMap, const std::vector<Label::LabelType> & types) {
+LabelCombinationsIterator::LabelCombinationsIterator(const LabelTypeTubeMap & labelMap, const std::vector<Label::LabelType> & types, bool emptyLabelAllowed) {
     maxSequenceIndex = 0;
     statesSequenceVector.reserve(labelMap.size());
 
@@ -8,7 +8,11 @@ LabelCombinationsIterator::LabelCombinationsIterator(const LabelTypeTubeMap & la
     for(const auto & tuple : labelMap) {
         Label label = tuple.second;
 
-        std::set<int> valuesOfSequence = {0};
+        std::set<int> valuesOfSequence;
+        if (emptyLabelAllowed) {
+            valuesOfSequence.insert(0);
+        }
+
         for(Label::LabelType type: types) {
             if (label.hasLabelMask(type)) {
                 valuesOfSequence.insert(type);

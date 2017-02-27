@@ -26,7 +26,7 @@ void ShortStatePredicateGenerator::analizeGraph() {
     std::shared_ptr<Predicate> mainPred = NULL;
 
     for(int closeContainerId: graph->getCloseContainersIdsSet()) {
-        std::shared_ptr<Predicate> closeContainerPred = generatePredicateCloseContainer(closeContainerId);
+         std::shared_ptr<Predicate> closeContainerPred = generatePredicateCloseContainer(closeContainerId);
         mainPred = calculator->andPredicates(mainPred, closeContainerPred);
     }
 
@@ -94,6 +94,7 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::generatePredicateOpenCo
 
     LabelTypeTubeMap labelMap;
     labelNodeArrivingLeavingSet(idOpenContainer, false, labelMap);
+    bool bothSigns = hasLabel(Label::smaller, labelMap);
 
     std::vector<Label::LabelType> labelTypes = {Label::zero};
     LabelCombinationsIterator labelIt(labelMap, labelTypes);
@@ -113,7 +114,7 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::generatePredicateOpenCo
             MachineGraph::GraphType::EdgeVector tubesNonZero;
 
             separateLabelMap(labelIt.getTubesLabelsMap(), Label::zero, tubesZero, tubesNonZero);
-            actualCombination = generatePredicateOpenContainer_arrivingLeavingCombination(idOpenContainer, false, tubesZero, tubesNonZero);
+            actualCombination = generatePredicateOpenContainer_arrivingLeavingCombination(idOpenContainer, false, bothSigns, tubesZero, tubesNonZero);
         }
         mainPred = calculator->orPredicates(mainPred, actualCombination);
     }
@@ -127,6 +128,7 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::generatePredicateOpenCo
 
     LabelTypeTubeMap labelMap;
     labelNodeArrivingLeavingSet(idOpenContainer, true, labelMap);
+    bool bothSigns = hasLabel(Label::smaller, labelMap);
 
     std::vector<Label::LabelType> labelTypes = {Label::zero};
     LabelCombinationsIterator labelIt(labelMap, labelTypes);
@@ -146,22 +148,28 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::generatePredicateOpenCo
             MachineGraph::GraphType::EdgeVector tubesNonZero;
 
             separateLabelMap(labelIt.getTubesLabelsMap(), Label::zero, tubesZero, tubesNonZero);
-            actualCombination = generatePredicateOpenContainer_arrivingLeavingCombination(idOpenContainer, true, tubesZero, tubesNonZero);
+            actualCombination = generatePredicateOpenContainer_arrivingLeavingCombination(idOpenContainer, true, bothSigns, tubesZero, tubesNonZero);
         }
         mainPred = calculator->orPredicates(mainPred, actualCombination);
     }
     return mainPred;
 }
 
-std::shared_ptr<Predicate> ShortStatePredicateGenerator::generatePredicateOpenContainer_arrivingLeavingCombination(int idOpenContainer,
-                                                                                                                   bool arriving,
-                                                                                                                   const MachineGraph::GraphType::EdgeVector & tubesZero,
-                                                                                                                   const MachineGraph::GraphType::EdgeVector & tubesNonZero)
+std::shared_ptr<Predicate> ShortStatePredicateGenerator::generatePredicateOpenContainer_arrivingLeavingCombination(
+        int idOpenContainer,
+        bool arriving,
+        bool bothSigns,
+        const MachineGraph::GraphType::EdgeVector & tubesZero,
+        const MachineGraph::GraphType::EdgeVector & tubesNonZero)
 {
     std::shared_ptr<Predicate> mainPred = allTubesSameEquality(tubesZero, Equality::equal, calculator->getNumber(0));
 
     std::shared_ptr<Predicate> bgZero = allTubesSameEquality(tubesNonZero, Equality::bigger, calculator->getNumber(0));
-    std::shared_ptr<Predicate> smZero = allTubesSameEquality(tubesNonZero, Equality::lesser, calculator->getNumber(0));
+
+    std::shared_ptr<Predicate> smZero = NULL;
+    if (bothSigns) {
+        smZero = allTubesSameEquality(tubesNonZero, Equality::lesser, calculator->getNumber(0));
+    }
 
     std::shared_ptr<Variable> containerVar = calculator->getVariable(VariableNominator::getContainerVarName(idOpenContainer));
 
@@ -182,8 +190,10 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::generatePredicateOpenCo
 
         bgZero = calculator->andPredicates(bgZero, containerPositiveEq);
 
-        smZero = calculator->andPredicates(smZero, sameId);
-        smZero = calculator->andPredicates(smZero, containerNegativeEq);
+        if (bothSigns) {
+            smZero = calculator->andPredicates(smZero, sameId);
+            smZero = calculator->andPredicates(smZero, containerNegativeEq);
+        }
 
         nonZeroPredicate = calculator->orPredicates(bgZero, smZero);
     } else {
@@ -196,7 +206,9 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::generatePredicateOpenCo
         bgZero = calculator->andPredicates(bgZero, sameId);
         bgZero = calculator->andPredicates(bgZero, containerPositiveEq);
 
-        smZero = calculator->andPredicates(smZero, containerNegativeEq);
+        if (bothSigns) {
+            smZero = calculator->andPredicates(smZero, containerNegativeEq);
+        }
 
         nonZeroPredicate = calculator->orPredicates(bgZero, smZero);
     }
@@ -233,15 +245,18 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::generatePredicateCloseC
     if (!leaving->empty() && !arriving->empty()) {
         std::shared_ptr<Predicate> combinationsPred = makeNodeTubesCombinations(idCloseContainer, true, *arriving.get(), *leaving.get());
 
-        std::shared_ptr<Predicate> arrivingZero = allTubesSameEquality(*arriving.get(), Equality::equal, calculator->getNumber(0));
-        std::shared_ptr<Predicate> leavingZero = allTubesSameEquality(*leaving.get(), Equality::equal, calculator->getNumber(0));
-        std::shared_ptr<Predicate> containerEq = calculator->createEquality(VariableNominator::getContainerVarName(idCloseContainer), 0);
+        std::shared_ptr<Predicate> zeroState = NULL;
+        if (leaving->size() + arriving->size() > 2) {
+            std::shared_ptr<Predicate> arrivingZero = allTubesSameEquality(*arriving.get(), Equality::equal, calculator->getNumber(0));
+            std::shared_ptr<Predicate> leavingZero = allTubesSameEquality(*leaving.get(), Equality::equal, calculator->getNumber(0));
+            std::shared_ptr<Predicate> containerEq = calculator->createEquality(VariableNominator::getContainerVarName(idCloseContainer), 0);
 
-        std::shared_ptr<Predicate> mainPred = calculator->andPredicates(arrivingZero, leavingZero);
-        mainPred = calculator->andPredicates(mainPred, containerEq);
+            zeroState = calculator->andPredicates(arrivingZero, leavingZero);
+            zeroState = calculator->andPredicates(zeroState, containerEq);
+        }
 
-        mainPred = calculator->orPredicates(mainPred, combinationsPred);
-        return mainPred;
+        combinationsPred = calculator->orPredicates(zeroState, combinationsPred);
+        return combinationsPred;
     } else {
         throw(std::invalid_argument("ShortStatePredicateGenerator::generatePredicateCloseContainer." + std::to_string(idCloseContainer) + " close container must has tubes leaving and arriving"));
     }
@@ -454,6 +469,18 @@ bool ShortStatePredicateGenerator::hasLabel(Label::LabelType type,
     return hasLabel;
 }
 
+bool ShortStatePredicateGenerator::hasLabel(Label::LabelType type, const LabelTypeTubeMap & labelMap) {
+    bool hasLabel = false;
+
+    auto it = labelMap.begin();
+    while (!hasLabel && (it != labelMap.end())) {
+        Label actualLabel = it->second;
+        hasLabel = actualLabel.hasLabelMask(type);
+        ++it;
+    }
+    return hasLabel;
+}
+
 ShortStatePredicateGenerator::LabelTypeTubeMap ShortStatePredicateGenerator::makeLabelMap(
         const MachineGraph::GraphType::EdgeVector & tubes,
         const Label & initValue)
@@ -500,6 +527,35 @@ void ShortStatePredicateGenerator::separateLabelMap(const LabelTypeTubeMap & map
         } else {
             MachineGraph::GraphType::EdgeTypePtr tube = graph->getTube(std::get<0>(tubeId), std::get<1>(tubeId));
             tubesNonType.push_back(tube);
+        }
+    }
+}
+
+void ShortStatePredicateGenerator::subtractTubesWithoutLabel(
+        const LabelTypeTubeMap & map,
+        Label::LabelType type,
+        MachineGraph::GraphType::EdgeVector & tubesToSubstract,
+        MachineGraph::GraphType::EdgeVector & tubesToAddSubstracted)
+    throw(std::invalid_argument)
+{
+    for(auto it = tubesToSubstract.begin(); it != tubesToSubstract.end();) {
+        MachineGraph::GraphType::EdgeTypePtr tubePtr = *it;
+        std::tuple<int,int> tubeId = std::make_tuple(tubePtr->getIdSource(), tubePtr->getIdTarget());
+
+        auto finded = map.find(tubeId);
+        if (finded != map.end()) {
+
+            Label actualLabel = finded->second;
+            if (!actualLabel.hasLabelMask(type))  {
+                it = tubesToSubstract.erase(it);
+                tubesToAddSubstracted.push_back(tubePtr);
+            } else {
+                ++it;
+            }
+
+        } else {
+            throw(std::invalid_argument("ShortStatePredicateGenerator::subtractTubesWithoutLabel(): Tube: " +
+                                        std::to_string(std::get<0>(tubeId)) + "->" + std::to_string(std::get<1>(tubeId)) + " is not present on the map."));
         }
     }
 }
@@ -797,15 +853,19 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::makeNodeTubesCombinatio
             MachineGraph::GraphType::EdgeVector leavingNonZero;
             separateLabelMap(leavingIt.getTubesLabelsMap(), Label::zero, leavingZero, leavingNonZero);
 
-            if (leavingNonZero.size() + leavingDummy.size() > 1) {
-                LabelTypeTubeMap labelsNonZeroLeaving = getSubMap(leavingMap, leavingNonZero);
+            MachineGraph::GraphType::EdgeVector tempLeavingDummy(leavingDummy);
+            subtractTubesWithoutLabel(leavingMap, Label::bigger, leavingNonZero, tempLeavingDummy);
 
+            if (!leavingNonZero.empty() &&
+                (leavingNonZero.size() + tempLeavingDummy.size() > 1))
+            {
+                LabelTypeTubeMap labelsNonZeroLeaving = getSubMap(leavingMap, leavingNonZero);
                 std::shared_ptr<Predicate> combinationPredicates =
                         makeNodeTubesCombinations_combinationNonZerosLeaving(nodeId,
                                                                              makeContainerEq,
                                                                              labelsNonZeroLeaving,
                                                                              arrivingDummy,
-                                                                             leavingDummy);
+                                                                             tempLeavingDummy);
                 if (combinationPredicates != NULL) {
                     std::shared_ptr<Predicate> tubesZero = allTubesSameEquality(leavingZero, Equality::equal, calculator->getNumber(0));
                     combinationPredicates = calculator->andPredicates(tubesZero, combinationPredicates);
@@ -832,8 +892,14 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::makeNodeTubesCombinatio
     LabelCombinationsIterator arrivingIt(arrivingMap, zero);
 
     while(arrivingIt.calculateNext()) {
-        LabelCombinationsIterator leavingIt(leavingMap, zero);
+        MachineGraph::GraphType::EdgeVector arrivingZero;
+        MachineGraph::GraphType::EdgeVector arrivingNonZero;
+        separateLabelMap(arrivingIt.getTubesLabelsMap(), Label::zero, arrivingZero, arrivingNonZero);
 
+        MachineGraph::GraphType::EdgeVector tempArrivingDummy(arrivingDummy);
+        subtractTubesWithoutLabel(arrivingMap, Label::bigger, arrivingNonZero, tempArrivingDummy);
+
+        LabelCombinationsIterator leavingIt(leavingMap, zero);
         while(leavingIt.calculateNext()) {
             const LabelCombinationsIterator::LabelSet & arrivItSet = arrivingIt.getLabelSet();
             const LabelCombinationsIterator::LabelSet & leavItSet = leavingIt.getLabelSet();
@@ -844,23 +910,40 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::makeNodeTubesCombinatio
                 //if a dummy label is set at least one tube is not zero
                 MachineGraph::GraphType::EdgeVector leavingZero;
                 MachineGraph::GraphType::EdgeVector leavingNonZero;
-                MachineGraph::GraphType::EdgeVector arrivingZero;
-                MachineGraph::GraphType::EdgeVector arrivingNonZero;
-
-                separateLabelMap(arrivingIt.getTubesLabelsMap(), Label::zero, arrivingZero, arrivingNonZero);
                 separateLabelMap(leavingIt.getTubesLabelsMap(), Label::zero, leavingZero, leavingNonZero);
 
-                if((leavingNonZero.size() + arrivingNonZero.size() + leavingDummy.size() + arrivingDummy.size()) > 1) {
-                    LabelTypeTubeMap labelsNonZeroArriving = getSubMap(arrivingMap, arrivingNonZero);
-                    LabelTypeTubeMap labelsNonZeroLeaving = getSubMap(leavingMap, leavingNonZero);
+                MachineGraph::GraphType::EdgeVector tempLeavingDummy(leavingDummy);
+                subtractTubesWithoutLabel(leavingMap, Label::bigger, leavingNonZero, tempLeavingDummy);
 
-                    std::shared_ptr<Predicate> combinationPredicates =
-                            makeNodeTubesCombinations_combinationNonZerosBoth(nodeId,
-                                                                              makeContainerEq,
-                                                                              labelsNonZeroArriving,
-                                                                              labelsNonZeroLeaving,
-                                                                              arrivingDummy,
-                                                                              leavingDummy);
+                if((leavingNonZero.size() + arrivingNonZero.size() + tempLeavingDummy.size() + tempArrivingDummy.size()) > 1) {
+
+                    std::shared_ptr<Predicate> combinationPredicates = NULL;
+                    if (leavingNonZero.empty() && !arrivingNonZero.empty()) { //arriving
+                        LabelTypeTubeMap labelsNonZeroArriving = getSubMap(arrivingMap, arrivingNonZero);
+                        combinationPredicates = makeNodeTubesCombinations_combinationNonZerosArriving(nodeId,
+                                                                                                      makeContainerEq,
+                                                                                                      labelsNonZeroArriving,
+                                                                                                      tempArrivingDummy,
+                                                                                                      tempLeavingDummy);
+                    } else if (!leavingNonZero.empty() && arrivingNonZero.empty()) {//leaving
+                        LabelTypeTubeMap labelsNonZeroLeaving = getSubMap(leavingMap, leavingNonZero);
+                        combinationPredicates = makeNodeTubesCombinations_combinationNonZerosLeaving(nodeId,
+                                                                                                     makeContainerEq,
+                                                                                                     labelsNonZeroLeaving,
+                                                                                                     tempArrivingDummy,
+                                                                                                     tempLeavingDummy);
+                    } else if (!leavingNonZero.empty() && !arrivingNonZero.empty()) { // both
+                        LabelTypeTubeMap labelsNonZeroArriving = getSubMap(arrivingMap, arrivingNonZero);
+                        LabelTypeTubeMap labelsNonZeroLeaving = getSubMap(leavingMap, leavingNonZero);
+                        combinationPredicates =
+                                makeNodeTubesCombinations_combinationNonZerosBoth(nodeId,
+                                                                                  makeContainerEq,
+                                                                                  labelsNonZeroArriving,
+                                                                                  labelsNonZeroLeaving,
+                                                                                  tempArrivingDummy,
+                                                                                  tempLeavingDummy);
+                    }
+
                     if (combinationPredicates != NULL) {
                         std::shared_ptr<Predicate> tubesZero = allTubesSameEquality(arrivingZero, Equality::equal, calculator->getNumber(0));
                         tubesZero = calculator->andPredicates(tubesZero, allTubesSameEquality(leavingZero, Equality::equal, calculator->getNumber(0)));
@@ -896,14 +979,19 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::makeNodeTubesCombinatio
             MachineGraph::GraphType::EdgeVector arrivingNonZero;
             separateLabelMap(arrivingIt.getTubesLabelsMap(), Label::zero, arrivingZero, arrivingNonZero);
 
-            if ((arrivingNonZero.size() + arrivingDummy.size()) > 1) {
-                LabelTypeTubeMap labelsNonZeroArriving = getSubMap(arrivingMap, arrivingNonZero);
+            MachineGraph::GraphType::EdgeVector tempArrivingDummy(arrivingDummy);
+            subtractTubesWithoutLabel(arrivingMap, Label::bigger, arrivingNonZero, tempArrivingDummy);
 
+
+            if (!arrivingNonZero.empty() &&
+               ((arrivingNonZero.size() + tempArrivingDummy.size()) > 1))
+            {
+                LabelTypeTubeMap labelsNonZeroArriving = getSubMap(arrivingMap, arrivingNonZero);
                 std::shared_ptr<Predicate> combinationPredicates =
                         makeNodeTubesCombinations_combinationNonZerosArriving(nodeId,
                                                                               makeContainerEq,
                                                                               labelsNonZeroArriving,
-                                                                              arrivingDummy,
+                                                                              tempArrivingDummy,
                                                                               leavingDummy);
                 if (combinationPredicates != NULL) {
                     std::shared_ptr<Predicate> tubesZero = allTubesSameEquality(arrivingZero, Equality::equal, calculator->getNumber(0));
@@ -928,19 +1016,17 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::makeNodeTubesCombinatio
     std::shared_ptr<Predicate> mainPred = NULL;
 
     std::vector<Label::LabelType> types = {Label::bigger, Label::smaller};
-    LabelCombinationsIterator arrivingIt(labelsArriving, types);
+    LabelCombinationsIterator arrivingIt(labelsArriving, types, false);
 
     while(arrivingIt.calculateNext()) {
-        LabelCombinationsIterator leavingIt(labelsLeaving, types);
+        MachineGraph::GraphType::EdgeVector aBigger;
+        MachineGraph::GraphType::EdgeVector aSmaller;
+        separateLabelMap(arrivingIt.getTubesLabelsMap(), Label::bigger, aBigger, aSmaller);
 
+        LabelCombinationsIterator leavingIt(labelsLeaving, types, false);
         while(leavingIt.calculateNext()) {
-
             TubeDirMap aDirMap = makeTubeDirMap(dummyArriving);
             TubeDirMap lDirMap = makeTubeDirMap(dummyLeaving);
-
-            MachineGraph::GraphType::EdgeVector aBigger;
-            MachineGraph::GraphType::EdgeVector aSmaller;
-            separateLabelMap(arrivingIt.getTubesLabelsMap(), Label::bigger, aBigger, aSmaller);
 
             bool canApply = true;
             if (!aBigger.empty()) {
@@ -1007,56 +1093,52 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::makeNodeTubesCombinatio
     std::shared_ptr<Predicate> mainPred = NULL;
 
     std::vector<Label::LabelType> types = {Label::bigger, Label::smaller};
-    LabelCombinationsIterator leavingIt(labelsLeaving, types);
+    LabelCombinationsIterator leavingIt(labelsLeaving, types, false);
 
     while(leavingIt.calculateNext()) {
-        const LabelCombinationsIterator::LabelSet & leavItSet = leavingIt.getLabelSet();
+        TubeDirMap aDirMap = makeTubeDirMap(dummyArriving);
+        TubeDirMap lDirMap = makeTubeDirMap(dummyLeaving);
 
-        if (leavItSet.find(dummy) == leavItSet.end()) {
-            TubeDirMap aDirMap = makeTubeDirMap(dummyArriving);
-            TubeDirMap lDirMap = makeTubeDirMap(dummyLeaving);
+        bool canApply = true;
+        MachineGraph::GraphType::EdgeVector lBigger;
+        MachineGraph::GraphType::EdgeVector lSmaller;
+        separateLabelMap(leavingIt.getTubesLabelsMap(), Label::bigger, lBigger, lSmaller);
 
-            bool canApply = true;
-            MachineGraph::GraphType::EdgeVector lBigger;
-            MachineGraph::GraphType::EdgeVector lSmaller;
-            separateLabelMap(leavingIt.getTubesLabelsMap(), Label::bigger, lBigger, lSmaller);
-
-            if (!lBigger.empty()) {
-                canApply = canApplyDirLeaving(Label::bigger, aDirMap, lDirMap);
-                if (canApply) {
-                    applyDirLeaving(Label::bigger, aDirMap, lDirMap);
-                }
+        if (!lBigger.empty()) {
+            canApply = canApplyDirLeaving(Label::bigger, aDirMap, lDirMap);
+            if (canApply) {
+                applyDirLeaving(Label::bigger, aDirMap, lDirMap);
             }
+        }
 
-            if (canApply && !lSmaller.empty()) {
-                canApply = canApplyDirLeaving(Label::smaller, aDirMap, lDirMap);
-                if (canApply) {
-                    applyDirLeaving(Label::smaller, aDirMap, lDirMap);
-                }
+        if (canApply && !lSmaller.empty()) {
+            canApply = canApplyDirLeaving(Label::smaller, aDirMap, lDirMap);
+            if (canApply) {
+                applyDirLeaving(Label::smaller, aDirMap, lDirMap);
             }
+        }
 
-            canApply = canApply & checkBothDirection(aDirMap,
-                                                     lDirMap,
-                                                     MachineGraph::GraphType::EdgeVector(),
-                                                     MachineGraph::GraphType::EdgeVector(),
-                                                     lBigger,
-                                                     lSmaller);
-            if(canApply) {
-                MachineGraph::GraphType::EdgeVector aDummyBigger;
-                MachineGraph::GraphType::EdgeVector aDummySmaller;
-                MachineGraph::GraphType::EdgeVector lDummyBigger;
-                MachineGraph::GraphType::EdgeVector lDummySmaller;
+        canApply = canApply & checkBothDirection(aDirMap,
+                                                 lDirMap,
+                                                 MachineGraph::GraphType::EdgeVector(),
+                                                 MachineGraph::GraphType::EdgeVector(),
+                                                 lBigger,
+                                                 lSmaller);
+        if(canApply) {
+            MachineGraph::GraphType::EdgeVector aDummyBigger;
+            MachineGraph::GraphType::EdgeVector aDummySmaller;
+            MachineGraph::GraphType::EdgeVector lDummyBigger;
+            MachineGraph::GraphType::EdgeVector lDummySmaller;
 
-                separateDirMap(aDirMap, aDummyBigger, aDummySmaller);
-                separateDirMap(lDirMap, lDummyBigger, lDummySmaller);
+            separateDirMap(aDirMap, aDummyBigger, aDummySmaller);
+            separateDirMap(lDirMap, lDummyBigger, lDummySmaller);
 
-                std::shared_ptr<Predicate> combinationPredicate =
-                        makeNodeTubesCombinations_processCombination(nodeId, makeContainerEq, aDummyBigger, aDummySmaller,
-                                                                     lDummyBigger, lDummySmaller, MachineGraph::GraphType::EdgeVector(),
-                                                                     MachineGraph::GraphType::EdgeVector(), lBigger, lSmaller);
+            std::shared_ptr<Predicate> combinationPredicate =
+                    makeNodeTubesCombinations_processCombination(nodeId, makeContainerEq, aDummyBigger, aDummySmaller,
+                                                                 lDummyBigger, lDummySmaller, MachineGraph::GraphType::EdgeVector(),
+                                                                 MachineGraph::GraphType::EdgeVector(), lBigger, lSmaller);
 
-                mainPred = calculator->orPredicates(mainPred, combinationPredicate);
-            }
+            mainPred = calculator->orPredicates(mainPred, combinationPredicate);
         }
     }
     return mainPred;
@@ -1072,55 +1154,51 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::makeNodeTubesCombinatio
     std::shared_ptr<Predicate> mainPred = NULL;
 
     std::vector<Label::LabelType> types = {Label::bigger, Label::smaller};
-    LabelCombinationsIterator arrivingIt(labelsArriving, types);
+    LabelCombinationsIterator arrivingIt(labelsArriving, types, false);
 
     while(arrivingIt.calculateNext()) {
-        const LabelCombinationsIterator::LabelSet & arrivItSet = arrivingIt.getLabelSet();
+        TubeDirMap aDirMap = makeTubeDirMap(dummyArriving);
+        TubeDirMap lDirMap = makeTubeDirMap(dummyLeaving);
 
-        if (arrivItSet.find(dummy) == arrivItSet.end()) {
-            TubeDirMap aDirMap = makeTubeDirMap(dummyArriving);
-            TubeDirMap lDirMap = makeTubeDirMap(dummyLeaving);
+        MachineGraph::GraphType::EdgeVector aBigger;
+        MachineGraph::GraphType::EdgeVector aSmaller;
+        separateLabelMap(arrivingIt.getTubesLabelsMap(), Label::bigger, aBigger, aSmaller);
 
-            MachineGraph::GraphType::EdgeVector aBigger;
-            MachineGraph::GraphType::EdgeVector aSmaller;
-            separateLabelMap(arrivingIt.getTubesLabelsMap(), Label::bigger, aBigger, aSmaller);
-
-            bool canApply = true;
-            if (!aBigger.empty()) {
-                canApply = canApplyDirArriving(Label::bigger, aDirMap, lDirMap);
-                if (canApply) {
-                    applyDirArriving(Label::bigger, aDirMap, lDirMap);
-                }
+        bool canApply = true;
+        if (!aBigger.empty()) {
+            canApply = canApplyDirArriving(Label::bigger, aDirMap, lDirMap);
+            if (canApply) {
+                applyDirArriving(Label::bigger, aDirMap, lDirMap);
             }
-            if (canApply && !aSmaller.empty()) {
-                canApply = canApplyDirArriving(Label::smaller, aDirMap, lDirMap);
-                if (canApply) {
-                    applyDirArriving(Label::smaller, aDirMap, lDirMap);
-                }
+        }
+        if (canApply && !aSmaller.empty()) {
+            canApply = canApplyDirArriving(Label::smaller, aDirMap, lDirMap);
+            if (canApply) {
+                applyDirArriving(Label::smaller, aDirMap, lDirMap);
             }
+        }
 
-            canApply = canApply & checkBothDirection(aDirMap,
-                                                     lDirMap,
-                                                     aBigger,
-                                                     aSmaller,
-                                                     MachineGraph::GraphType::EdgeVector(),
-                                                     MachineGraph::GraphType::EdgeVector());
-            if(canApply) {
-                MachineGraph::GraphType::EdgeVector aDummyBigger;
-                MachineGraph::GraphType::EdgeVector aDummySmaller;
-                MachineGraph::GraphType::EdgeVector lDummyBigger;
-                MachineGraph::GraphType::EdgeVector lDummySmaller;
+        canApply = canApply & checkBothDirection(aDirMap,
+                                                 lDirMap,
+                                                 aBigger,
+                                                 aSmaller,
+                                                 MachineGraph::GraphType::EdgeVector(),
+                                                 MachineGraph::GraphType::EdgeVector());
+        if(canApply) {
+            MachineGraph::GraphType::EdgeVector aDummyBigger;
+            MachineGraph::GraphType::EdgeVector aDummySmaller;
+            MachineGraph::GraphType::EdgeVector lDummyBigger;
+            MachineGraph::GraphType::EdgeVector lDummySmaller;
 
-                separateDirMap(aDirMap, aDummyBigger, aDummySmaller);
-                separateDirMap(lDirMap, lDummyBigger, lDummySmaller);
+            separateDirMap(aDirMap, aDummyBigger, aDummySmaller);
+            separateDirMap(lDirMap, lDummyBigger, lDummySmaller);
 
-                std::shared_ptr<Predicate> combinationPredicate =
-                        makeNodeTubesCombinations_processCombination(nodeId, makeContainerEq, aDummyBigger, aDummySmaller,
-                                                                     lDummyBigger, lDummySmaller, aBigger, aSmaller,
-                                                                     MachineGraph::GraphType::EdgeVector(), MachineGraph::GraphType::EdgeVector());
+            std::shared_ptr<Predicate> combinationPredicate =
+                    makeNodeTubesCombinations_processCombination(nodeId, makeContainerEq, aDummyBigger, aDummySmaller,
+                                                                 lDummyBigger, lDummySmaller, aBigger, aSmaller,
+                                                                 MachineGraph::GraphType::EdgeVector(), MachineGraph::GraphType::EdgeVector());
 
-                mainPred = calculator->orPredicates(mainPred, combinationPredicate);
-            }
+            mainPred = calculator->orPredicates(mainPred, combinationPredicate);
         }
     }
     return mainPred;
@@ -1146,15 +1224,15 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::makeNodeTubesCombinatio
     dummySameRateEq = calculator->andPredicates(dummySameRateEq,
                                                 samePropertyTube(lDummySmaller, *calculator.get(), &CommomRulesOperations::calculateRate));
 
-    std::shared_ptr<Predicate> tubesPositiveEq = allTubesSameEquality(aDummyBigger, Equality::bigger, calculator->getNumber(0));
-    tubesPositiveEq = calculator->andPredicates(tubesPositiveEq, allTubesSameEquality(lDummyBigger, Equality::bigger, calculator->getNumber(0)));
-    tubesPositiveEq = calculator->andPredicates(tubesPositiveEq, allTubesSameEquality(aBigger, Equality::bigger, calculator->getNumber(0)));
-    tubesPositiveEq = calculator->andPredicates(tubesPositiveEq, allTubesSameEquality(lBigger, Equality::bigger, calculator->getNumber(0)));
+    std::shared_ptr<Predicate> tubesArrivingEq = allTubesSameEquality(aDummyBigger, Equality::bigger, calculator->getNumber(0));
+    tubesArrivingEq = calculator->andPredicates(tubesArrivingEq,allTubesSameEquality(aDummySmaller, Equality::lesser, calculator->getNumber(0)));
+    tubesArrivingEq = calculator->andPredicates(tubesArrivingEq, allTubesSameEquality(aBigger, Equality::bigger, calculator->getNumber(0)));
+    tubesArrivingEq = calculator->andPredicates(tubesArrivingEq, allTubesSameEquality(aSmaller, Equality::lesser, calculator->getNumber(0)));
 
-    std::shared_ptr<Predicate> tubesNegativeEq = allTubesSameEquality(aDummySmaller, Equality::lesser, calculator->getNumber(0));
-    tubesNegativeEq = calculator->andPredicates(tubesNegativeEq, allTubesSameEquality(lDummySmaller, Equality::lesser, calculator->getNumber(0)));
-    tubesNegativeEq = calculator->andPredicates(tubesNegativeEq, allTubesSameEquality(aSmaller, Equality::lesser, calculator->getNumber(0)));
-    tubesNegativeEq = calculator->andPredicates(tubesNegativeEq, allTubesSameEquality(lSmaller, Equality::lesser, calculator->getNumber(0)));
+    std::shared_ptr<Predicate> tubesLeavingEq = allTubesSameEquality(lDummyBigger, Equality::bigger, calculator->getNumber(0));
+    tubesLeavingEq = calculator->andPredicates(tubesLeavingEq, allTubesSameEquality(lDummySmaller, Equality::lesser, calculator->getNumber(0)));
+    tubesLeavingEq = calculator->andPredicates(tubesLeavingEq, allTubesSameEquality(lBigger, Equality::bigger, calculator->getNumber(0)));
+    tubesLeavingEq = calculator->andPredicates(tubesLeavingEq, allTubesSameEquality(lSmaller, Equality::lesser, calculator->getNumber(0)));
 
     std::shared_ptr<ArithmeticOperable> arrivingIdSum = addAllTubesProperty(aBigger, *calculator.get(), &CommomRulesOperations::calculateId);
     arrivingIdSum = calculator->addOperables(arrivingIdSum, addAllTubesProperty(aDummyBigger, *calculator.get(), &CommomRulesOperations::calculateId));
@@ -1193,8 +1271,8 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::makeNodeTubesCombinatio
         containerEq = calculator->createEquality(VariableNominator::getContainerVarName(nodeId), leavingTubesValue);
     }
 
-    std::shared_ptr<Predicate> mainPred = calculator->andPredicates(dummySameRateEq, tubesPositiveEq);
-    mainPred = calculator->andPredicates(mainPred, tubesNegativeEq);
+    std::shared_ptr<Predicate> mainPred = calculator->andPredicates(dummySameRateEq, tubesArrivingEq);
+    mainPred = calculator->andPredicates(mainPred, tubesLeavingEq);
     mainPred = calculator->andPredicates(mainPred, leavingTubesPositiveEq);
     mainPred = calculator->andPredicates(mainPred, leavingTubesNegativeEq);
     mainPred = calculator->andPredicates(mainPred, containerEq);
@@ -1308,7 +1386,7 @@ Label ShortStatePredicateGenerator::labelTube(int nodeStart, int nodeAvoid) {
     Label tubeLbel;
 
     std::unordered_set<int> nodes2avoid = {nodeAvoid};
-    MachineGraphIterator graphIt(nodeStart, graph, nodes2avoid);
+    MachineGraphPressureIterator graphIt(nodeStart, graph, nodes2avoid);
 
     while(graphIt.advance() && !tubeLbel.isFull()) {
         int nextNode = graphIt.getActualNode();

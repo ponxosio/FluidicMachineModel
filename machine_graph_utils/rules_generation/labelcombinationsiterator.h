@@ -18,7 +18,7 @@ public:
     typedef std::unordered_map<std::tuple<int,int>, Label, PairIntIntHashFunction> LabelTypeTubeMap;
     typedef std::unordered_set<Label, Label::LabelHash> LabelSet;
 
-    LabelCombinationsIterator(const LabelTypeTubeMap  & labelMap, const std::vector<Label::LabelType> & types);
+    LabelCombinationsIterator(const LabelTypeTubeMap  & labelMap, const std::vector<Label::LabelType> & types, bool emptyLabelAllowed = true);
     virtual ~LabelCombinationsIterator();
 
     bool calculateNext();

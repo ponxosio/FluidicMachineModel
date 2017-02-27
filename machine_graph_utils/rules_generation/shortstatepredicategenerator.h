@@ -7,7 +7,7 @@
 #include <bitset>
 
 #include "machinegraph.h"
-#include "machine_graph_utils/machinegraphiterator.h"
+#include "machine_graph_utils/machinegraphpressureiterator.h"
 #include "machine_graph_utils/variablenominator.h"
 #include "machine_graph_utils/rules_generation/label.h"
 #include "machine_graph_utils/rules_generation/labelcombinationsiterator.h"
@@ -48,6 +48,7 @@ protected:
     std::shared_ptr<Predicate> generatePredicateOpenContainer_liquidId(int idOpenContainer);
     std::shared_ptr<Predicate> generatePredicateOpenContainer_arrivingLeavingCombination(int idOpenContainer,
                                                                                          bool arriving,
+                                                                                         bool bothSigns,
                                                                                          const MachineGraph::GraphType::EdgeVector & tubesZero,
                                                                                          const MachineGraph::GraphType::EdgeVector & tubesNonZero);
 
@@ -142,6 +143,7 @@ protected:
     bool hasLabel(Label::LabelType type,
                   const LabelTypeTubeMap & labelMap,
                   const MachineGraph::GraphType::EdgeVector & tubes) throw(std::invalid_argument);
+    bool hasLabel(Label::LabelType type, const LabelTypeTubeMap & labelMap);
 
     LabelTypeTubeMap makeLabelMap(const MachineGraph::GraphType::EdgeVector & tubes, const Label & initValue);
     void separateLabelMap(const LabelTypeTubeMap & map,
@@ -152,6 +154,11 @@ protected:
                           const Label & label,
                           MachineGraph::GraphType::EdgeVector & tubesType,
                           MachineGraph::GraphType::EdgeVector & tubesNonType);
+
+    void subtractTubesWithoutLabel(const LabelTypeTubeMap & map,
+                                   Label::LabelType type,
+                                   MachineGraph::GraphType::EdgeVector & tubesToSubstract,
+                                   MachineGraph::GraphType::EdgeVector & tubesToAddSubstracted) throw(std::invalid_argument);
 
     void separateDirMap(const TubeDirMap & dirMap,
                         MachineGraph::GraphType::EdgeVector & tubesRegular,
