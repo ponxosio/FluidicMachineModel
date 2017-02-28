@@ -779,12 +779,23 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::makeNodeTubesCombinatio
     throw(std::invalid_argument)
 {
     std::shared_ptr<Predicate> mainPred = NULL;
-    if (tubesArriving.size() == 1 && tubesLeaving.size() == 1) {
-        MachineGraph::GraphType::EdgeTypePtr aTube = tubesArriving.back();
-        MachineGraph::GraphType::EdgeTypePtr lTube = tubesLeaving.back();
+    if (tubesArriving.size() + tubesLeaving.size() == 2) {
+        MachineGraph::GraphType::EdgeTypePtr aTube;
+        MachineGraph::GraphType::EdgeTypePtr lTube;
+
+        if (tubesArriving.empty()) { //both leaving
+            aTube = tubesLeaving[0];
+            lTube = tubesLeaving[1];
+        } else if (tubesLeaving.empty()) { //both arriving
+            aTube = tubesArriving[0];
+            lTube = tubesArriving[1];
+        } else { //arriving and leaving
+            aTube = tubesArriving.back();
+            lTube = tubesLeaving.back();
+        }
+
         mainPred = calculator->createEquality(VariableNominator::getTubeVarName(lTube->getIdSource(), lTube->getIdTarget()),
                                               VariableNominator::getTubeVarName(aTube->getIdSource(), aTube->getIdTarget()));
-
         if (makeContainerEq) {
             std::shared_ptr<Predicate> containerEq = calculator->createEquality(VariableNominator::getContainerVarName(nodeId),
                                                                                 VariableNominator::getTubeVarName(aTube->getIdSource(), aTube->getIdTarget()));
