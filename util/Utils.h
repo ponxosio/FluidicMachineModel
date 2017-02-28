@@ -20,12 +20,14 @@
 #include <vector>
 #include <tuple>
 
+#include "fluidicmachinemodel_global.h"
+
 using namespace std;
 
 /**
  * Class only eith static methods that do miscelaneus staff
  */
-class Utils {
+class UTILS_EXPORT Utils {
 
 public:
 	/**

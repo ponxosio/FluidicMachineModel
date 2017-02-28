@@ -48,7 +48,7 @@ public:
 
     long long rateToInt(float rate) throw(std::overflow_error);
     float rateToFloat(long long rate);
-    long long generateState(int liquidId, float rate) throw(std::runtime_error);
+    long long generateState(int liquidId, float rate) throw(std::overflow_error);
 
     inline short int getRatePrecisionInteger() {
         return ratePrecisionInteger;

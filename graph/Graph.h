@@ -278,8 +278,8 @@ bool Graph<NodeType,EdgeType>::removeNode(int nodeID) {
 		//remove all the edges that use idNode
         for(auto it = edgeMap->begin(); it != edgeMap->end(); ) {
             EdgeTypePtr actual = it->second;
-            if ((actual->getIdSource() == nodeId) ||
-                (actual->getIdTarget() == nodeId))
+            if ((actual->getIdSource() == nodeID) ||
+                (actual->getIdTarget() == nodeID))
             {
                 it = edgeMap->erase(it);
             } else {

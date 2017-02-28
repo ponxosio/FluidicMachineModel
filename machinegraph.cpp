@@ -83,7 +83,7 @@ MachineGraph::GraphType::EdgeTypePtr MachineGraph::getTube(int idSource, int idT
     if (edge != NULL) {
         return edge;
     } else {
-        throw(std::invalid_argument("unknow tube " + std::to_string(idSource) + "->" + std::to_string(idTarget)));
+        throw(std::invalid_argument("MachineGraph::getTube. unknow tube " + std::to_string(idSource) + "->" + std::to_string(idTarget)));
     }
 }
 

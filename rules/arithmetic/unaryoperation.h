@@ -8,13 +8,15 @@
 
 #include "fluidicmachinemodel_global.h"
 
-typedef enum UnaryOperators_ {
-    absolute_value,
-} UnaryOperators;
+
 
 class UNARYOPERATION_EXPORT UnaryOperation : public ArithmeticOperable
 {
 public:
+    typedef enum UnaryOperators_ {
+        absolute_value,
+    } UnaryOperators;
+
     UnaryOperation(std::shared_ptr<ArithmeticOperable> operable, UnaryOperators op);
     virtual ~UnaryOperation();
 
