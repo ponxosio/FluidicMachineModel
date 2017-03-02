@@ -1,6 +1,8 @@
 #ifndef MACHINEFLOW_H
 #define MACHINEFLOW_H
 
+#include <sstream>
+#include <string>
 #include <unordered_map>
 #include <vector>
 #include <deque>
@@ -22,6 +24,8 @@ public:
     void addFlow(short int idSource, short int idTarget, float rate);
     void removeFlow(short int idSource, short int idTarget);
     const FlowsVector & updateFlows();
+
+    std::string flowToStr();
 
     inline void clear() {
         previous.clear();

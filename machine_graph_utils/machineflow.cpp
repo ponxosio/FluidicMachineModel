@@ -47,6 +47,21 @@ const MachineFlow::FlowsVector & MachineFlow::updateFlows() {
     return previous;
 }
 
+std::string MachineFlow::flowToStr() {
+    std::stringstream stream;
+    stream << "[";
+
+    for(const PathRateTuple & pathRate: previous)  {
+        stream << "<[";
+        for(int id: std::get<0>(pathRate)) {
+            stream << id << ",";
+        }
+        stream << "]," << std::get<1>(pathRate) << ">,";
+    }
+    stream << "]";
+    return stream.str();
+}
+
 bool MachineFlow::tryAppend(PathRateTuple & tuple, short int idSource, short int idTarget, float rate) {
     bool suceed = (rate == std::get<1>(tuple));
     if (suceed) {

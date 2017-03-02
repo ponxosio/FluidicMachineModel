@@ -39,15 +39,15 @@ void PluginConfiguration::setParams(const std::unordered_map<std::string,std::st
     }
 }
 
-std::string PluginConfiguration::getPluginType() {
+const std::string & PluginConfiguration::getPluginType() const {
     return pluginType;
 }
 
-const std::unordered_map<std::string,std::string> & PluginConfiguration::getParams() {
+const std::unordered_map<std::string,std::string> & PluginConfiguration::getParams() const {
     return params;
 }
 
-std::string PluginConfiguration::getName() {
+const std::string & PluginConfiguration::getName() const {
     return this->name;
 }
 

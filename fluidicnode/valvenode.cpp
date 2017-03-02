@@ -13,6 +13,7 @@ ValveNode::ValveNode(int idNode, int numPins, const TruthTable & truthTable, std
     if(valveRouteFunction->getAceptedOp() != route) {
         throw(std::invalid_argument("ValveNode's valveRouteFunction must be capable of route"));
     }
+    availableFunctions.addOperation(valveRouteFunction);
 
     try {
         checkTruthTableFormat(truthTable);

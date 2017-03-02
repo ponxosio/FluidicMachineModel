@@ -20,11 +20,11 @@ double PumpPluginFunction::doOperation(int nargs, va_list args) throw (std::inva
     }
 
     if (nargs == 2) {
-        //va_start(ap, args);
+        //va_start(args, nargs);
         int dir = va_arg(args, int);
-        float rate = va_arg(args, float);
+        double rate = va_arg(args, double);
         pluginPump->setPumpState(dir, rate);
-        //va_end(ap);
+        //va_end(args);
         return -1;
     } else {
         throw(std::invalid_argument(" doOperation() of PumpPluginFunction must receive 2 arguments, received " + std::to_string(nargs)));

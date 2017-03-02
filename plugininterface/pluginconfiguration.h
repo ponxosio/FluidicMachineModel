@@ -20,9 +20,9 @@ public:
     void setParams(const std::unordered_map<std::string,std::string> & params);
     void setName(const std::string & name);
 
-    std::string getPluginType();
-    std::string getName();
-    const std::unordered_map<std::string,std::string> & getParams();
+    const std::string & getPluginType() const;
+    const std::string & getName() const;
+    const std::unordered_map<std::string,std::string> & getParams() const;
 
 protected:
     std::string pluginType;
