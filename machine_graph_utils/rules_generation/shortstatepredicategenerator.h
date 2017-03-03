@@ -6,6 +6,8 @@
 #include <vector>
 #include <bitset>
 
+#include <utils/Utils.h>
+
 #include "machinegraph.h"
 #include "machine_graph_utils/machinegraphpressureiterator.h"
 #include "machine_graph_utils/variablenominator.h"
@@ -16,7 +18,6 @@
 #include "rules/equality.h"
 #include "rules/arithmetic/arithmeticoperable.h"
 #include "rules/variabledomain.h"
-#include "util/Utils.h"
 
 class GraphRulesGenerator;
 class CommomRulesOperations;

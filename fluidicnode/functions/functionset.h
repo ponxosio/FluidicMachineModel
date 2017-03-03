@@ -14,7 +14,7 @@
 #include <cstdarg>
 #include <stdexcept>
 
-#include"fluidicnode/functions/function.h"
+#include "fluidicnode/functions/function.h"
 #include "plugininterface/pluginabstractfactory.h"
 
 class FunctionSet

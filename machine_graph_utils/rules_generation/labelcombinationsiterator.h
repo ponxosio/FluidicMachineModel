@@ -6,9 +6,10 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <machine_graph_utils/rules_generation/label.h>
-#include <util/sequence.h>
-#include <util/Utils.h>
+#include <utils/sequence.h>
+#include <utils/Utils.h>
+
+#include "machine_graph_utils/rules_generation/label.h"
 
 #include "fluidicmachinemodel_global.h"
 

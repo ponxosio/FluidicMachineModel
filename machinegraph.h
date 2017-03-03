@@ -6,7 +6,10 @@
 #include <unordered_set>
 #include <vector>
 
-#include "graph/Graph.h"
+#include <graph/Graph.h>
+#include <utils/AutoEnumerate.h>
+#include <utils/Utils.h>
+
 #include "fluidicedge/tubeedge.h"
 #include "fluidicnode/fluidicmachinenode.h"
 #include "fluidicnode/pumpnode.h"
@@ -14,8 +17,6 @@
 #include "fluidicnode/containernode.h"
 #include "fluidicnode/functions/function.h"
 #include "plugininterface/pluginabstractfactory.h"
-#include "util/AutoEnumerate.h"
-#include "util/Utils.h"
 
 #include "fluidicmachinemodel_global.h"
 

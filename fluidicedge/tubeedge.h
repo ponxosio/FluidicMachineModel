@@ -5,7 +5,7 @@
 #define REGULAR_STR "Regular"
 #define INVERTED_STR "Inverted"
 
-#include "graph/Edge.h"
+#include <graph/Edge.h>
 
 class TubeEdge : public Edge
 {

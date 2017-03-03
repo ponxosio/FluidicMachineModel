@@ -8,7 +8,7 @@
 #include <deque>
 #include <algorithm>
 
-#include "util/Utils.h"
+#include <utils/Utils.h>
 
 #include "fluidicmachinemodel_global.h"
 

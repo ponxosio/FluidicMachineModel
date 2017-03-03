@@ -5,7 +5,8 @@
 #include <cstdarg>
 #include <unordered_map>
 
-#include "graph/Node.h"
+#include <graph/Node.h>
+
 #include "fluidicedge/tubeedge.h"
 #include "fluidicnode/functions/functionset.h"
 
