@@ -10,7 +10,7 @@ public:
     virtual ~RoutingEngine(){}
 
     virtual bool calculateNewRoute(const std::unordered_map<std::string, long long> & inputStates,
-                                   std::unordered_map<std::string, long long> & newStates) throw(std::runtime_error) = 0;
+                                   std::unordered_map<std::string, long long> & outStates) throw(std::runtime_error) = 0;
 
 };
 

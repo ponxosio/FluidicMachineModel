@@ -20,8 +20,8 @@ double MeasureOdFunction::doOperation(int nargs, va_list args) throw (std::inval
     }
 
     if (nargs == 0) {
-        //va_start(ap, args);
-        //va_end(ap);
+        //va_start(args, nargs);
+        //va_end(args);
         return odSensoPlugin->measureOd();
     } else {
         throw(std::invalid_argument(" doOperation() of MeasureOdFunction must receive 0 argument, received " + std::to_string(nargs)));
