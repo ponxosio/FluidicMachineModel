@@ -15,6 +15,7 @@
 #include "machine_graph_utils/machinestate.h"
 #include "machine_graph_utils/machineflow.h"
 #include "machine_graph_utils/variablenominator.h"
+#include "machine_graph_utils/graphrulesgenerator.h"
 
 #include "constraintssolverinterface/translationstack.h"
 #include "constraintssolverinterface/routingengine.h"
@@ -64,7 +65,7 @@ protected:
     std::shared_ptr<RoutingEngine> routingEngine;
 
     std::shared_ptr<RoutingEngine> translateRules() throw(std::runtime_error);
-    void analizeGraph() throw(std::overflow_error);
+    void analizeGraph(short int ratePrecisionInteger, short int ratePrecisionDecimal);
 
     void addStack2State(const std::deque<short int> & queue, float rate, MachineState & state) throw(std::invalid_argument);
     void sendActualState2components() throw(std::runtime_error);

@@ -261,6 +261,18 @@ long long MachineState::generateState(int liquidId, float rate) throw(std::overf
     }
 }
 
+std::string MachineState::toString() {
+    std::stringstream stream;
+
+    stream << mapToString(containersMap);
+    stream << mapToString(tubesMap);
+    stream << mapToString(valvesMap);
+    stream << mapToString(pumpsMap);
+    stream << mapToString(pumpsRatesMap);
+
+    return stream.str();
+}
+
 void MachineState::analizeGraph() throw (std::invalid_argument) {
     for (int pumpId : graph->getPumpsIdsSet()) {
         try {
@@ -405,8 +417,13 @@ void MachineState::overrideTubeState(const std::string & name, long long state) 
     }
 }
 
-
-
+std::string MachineState::mapToString(const std::unordered_map<std::string, long long> & map) {
+    std::stringstream stream;
+    for(const auto & pair: map) {
+        stream << pair.first << ":" << pair.second << ";";
+    }
+    return stream.str();
+}
 
 
 

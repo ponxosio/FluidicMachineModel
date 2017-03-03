@@ -47,11 +47,11 @@ const std::unordered_map<std::string,std::string> & PluginConfiguration::getPara
     return params;
 }
 
-std::string PluginConfiguration::getName() {
-    return this->name;
+const std::string & PluginConfiguration::getName() {
+    return name;
 }
 
 void PluginConfiguration::setName(const std::string & name) {
-    this->name = name;
+    this->name = std::string(name);
 }
 

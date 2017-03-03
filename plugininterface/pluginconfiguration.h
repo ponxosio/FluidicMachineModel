@@ -21,7 +21,7 @@ public:
     void setName(const std::string & name);
 
     std::string getPluginType();
-    std::string getName();
+    const std::string & getName();
     const std::unordered_map<std::string,std::string> & getParams();
 
 protected:

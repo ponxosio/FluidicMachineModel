@@ -11,9 +11,9 @@ FluidicMachineModel::FluidicMachineModel(std::shared_ptr<MachineGraph> graph,
     maxOpenContainer = actualFullMachineState.getMaxOpenContainers();
 
     try {
-        analizeGraph();
+        analizeGraph(ratePrecisionInteger, ratePrecisionDecimal);
     } catch (std::overflow_error & e) {
-        throw(std::overflow_error("overflow error while analyzing graph, error: " + std::string(e.what())));
+        throw(std::overflow_error("FluidicMachineModel::FluidicMachineModel. Overflow error while analyzing graph, error: " + std::string(e.what())));
     }
 }
 
@@ -67,6 +67,7 @@ void FluidicMachineModel::stopContinuousFlow(short int idStart, short int idEnd)
 }
 
 void FluidicMachineModel::calculateNewRoute() throw(std::runtime_error) {
+    bool possibleFlow;
     MachineState containers2Set(graph, actualFullMachineState.getRatePrecisionInteger(), actualFullMachineState.getRatePrecisionDecimal());
     MachineFlow::FlowsVector flows2Set = flowEngine.updateFlows();
 
@@ -77,8 +78,16 @@ void FluidicMachineModel::calculateNewRoute() throw(std::runtime_error) {
         if (!routingEngine) {
             routingEngine = translateRules();
         }
-        actualFullMachineState.setAllStates(routingEngine->calculateNewRoute(containers2Set.getAllContainersTubes()));
-        sendActualState2components();
+
+        std::unordered_map<std::string, long long> newStates;
+        possibleFlow = routingEngine->calculateNewRoute(containers2Set.getAllContainersTubes(), newStates);
+
+        if (possibleFlow) {
+            actualFullMachineState.setAllStates(newStates);
+            sendActualState2components();
+        } else {
+            throw(std::runtime_error("claculateNewRoute(): imposible to set state: " + containers2Set.toString()));
+        }
     } catch (std::invalid_argument & e) {
         throw(std::runtime_error("claculateNewRoute(): invalid argument error, message:" + std::string(e.what())));
     } catch (std::runtime_error & e) {
@@ -149,6 +158,11 @@ std::shared_ptr<RoutingEngine> FluidicMachineModel::translateRules() throw(std::
     }
 }
 
-void FluidicMachineModel::analizeGraph() throw(std::overflow_error) {
+void FluidicMachineModel::analizeGraph(short int ratePrecisionInteger, short int ratePrecisionDecimal) {
+    GraphRulesGenerator rulesGenerator(graph, ratePrecisionInteger, ratePrecisionDecimal);
+    const std::vector<std::shared_ptr<Rule>> & newRulesVector = rulesGenerator.getRules();
 
+    rules.clear();
+    rules.reserve(newRulesVector.size());
+    copy(newRulesVector.begin(), newRulesVector.end(), rules.begin());
 }

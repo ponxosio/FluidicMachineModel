@@ -5,6 +5,7 @@
 
 #include <bitset>
 #include <cmath>
+#include <sstream>
 #include <string>
 #include <stdexcept>
 #include <tuple>
@@ -50,6 +51,8 @@ public:
     float rateToFloat(long long rate);
     long long generateState(int liquidId, float rate) throw(std::overflow_error);
 
+    std::string toString();
+
     inline short int getRatePrecisionInteger() {
         return ratePrecisionInteger;
     }
@@ -91,6 +94,8 @@ protected:
     inline long long getId(long long state) {
         return abs(trunc(state / pow(10, ratePrecisionDecimal + ratePrecisionInteger)));
     }
+
+    std::string mapToString(const std::unordered_map<std::string, long long> & map);
 };
 
 #endif // MACHINESTATE_H
