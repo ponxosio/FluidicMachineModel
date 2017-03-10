@@ -20,6 +20,14 @@
 
 #include "fluidicmachinemodel_global.h"
 
+/**
+ * @brief The MachineGraph class is a directed graph that represents the layout of a fuidic machine compound of: containers, pumps and valves.
+ *
+ * The MachineGraph class is a directed graph that represents the layout of a millifuidic machine compound of: containers, pumps and valves.
+ * The containers, pumps and valves are the nodes of the graph and the edges represents the physical connections(tubes, grooves..etc)  between
+ * them. This class contains method to add, retreive and connect nodes(pumps, valves, containers) and to calculated the connected components of
+ * a the layout taking into account the state of the nodes, for example, if a valve is close this methods ignore the edges leaving that node.
+ */
 class MACHINEGRAPH_EXPORT MachineGraph
 {
     friend class MachineGraphGenerator;
