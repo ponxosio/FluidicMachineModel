@@ -16,7 +16,7 @@ ContainerNode::ContainerNode(const ContainerNode & node) :
     this->containerType = node.containerType;
 }
 
-ContainerNode::ContainerNode(int idNode, int numPins, ContainerType containerType, double maxVolume) :
+ContainerNode::ContainerNode(int idNode, int numPins, ContainerType containerType, units::Volume maxVolume) :
     FluidicMachineNode(idNode, numPins)
 {
     this->containerType = containerType;
@@ -25,21 +25,21 @@ ContainerNode::ContainerNode(int idNode, int numPins, ContainerType containerTyp
 }
 
 void ContainerNode::addOperation(std::shared_ptr<Function> function) {
-    availableFunctions.addOperation(function);
+    ComponentInterface::availableFunctions.addOperation(function);
 }
 
-double ContainerNode::getMaxVolume() {
+units::Volume ContainerNode::getMaxVolume() {
     return maxVolume;
 }
 
-double ContainerNode::getActualVolume() {
+units::Volume ContainerNode::getActualVolume() {
     return actualVolume;
 }
 
-ContainerType ContainerNode::getContainerType() {
+ContainerNode::ContainerType ContainerNode::getContainerType() {
     return containerType;
 }
 
-void ContainerNode::setActualVolume(double volume) {
+void ContainerNode::setActualVolume(units::Volume volume) {
     actualVolume = volume;
 }

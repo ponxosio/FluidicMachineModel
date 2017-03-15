@@ -6,11 +6,11 @@
 #include <unordered_map>
 
 #include <graph/Node.h>
+#include <commonmodel/modelinterface/componentinterface.h>
 
 #include "fluidicedge/tubeedge.h"
-#include "fluidicnode/functions/functionset.h"
 
-class FluidicMachineNode : public Node
+class FluidicMachineNode : public Node, public ComponentInterface
 {
 public:
     FluidicMachineNode();
@@ -21,20 +21,18 @@ public:
     void connectToPin(int pin, std::shared_ptr<TubeEdge> edge) throw (std::invalid_argument);
     std::tuple<int,int> getTubeIdConnectedToPin(int id) throw (std::invalid_argument);
 
-    bool canDoOperations(unsigned long mask);
-    double doOperation(OperationType op, int nargs, ...) throw (std::invalid_argument);
-    double getMinVolume(OperationType op) throw (std::invalid_argument);
+    virtual bool canDoOperations(unsigned long mask);
+    virtual MultiUnitsWrapper* doOperation(Function::OperationType op, int nargs, ...) throw (std::invalid_argument);
+    virtual units::Volume getMinVolume(Function::OperationType op) throw (std::invalid_argument);
 
-    const FunctionSet getAvailableFunctions();
     void setFactory(std::shared_ptr<PluginAbstractFactory> factory);
-    void setFactory(OperationType op, std::shared_ptr<PluginAbstractFactory> factory) throw(std::invalid_argument);
+    void setFactory(Function::OperationType op, std::shared_ptr<PluginAbstractFactory> factory) throw(std::invalid_argument);
 
     inline virtual Node* clone() = 0;
 
 protected:
     int numberOfPins;
     std::unordered_map<int,std::tuple<int,int>> pinConnectionMap;
-    FunctionSet availableFunctions;
 };
 
 #endif // FLUIDICMACHINENODE_H

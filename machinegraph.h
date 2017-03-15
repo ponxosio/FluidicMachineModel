@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include <commonmodel/functions/function.h>
 #include <graph/Graph.h>
 #include <utils/AutoEnumerate.h>
 #include <utils/Utils.h>
@@ -15,7 +16,6 @@
 #include "fluidicnode/pumpnode.h"
 #include "fluidicnode/valvenode.h"
 #include "fluidicnode/containernode.h"
-#include "fluidicnode/functions/function.h"
 #include "plugininterface/pluginabstractfactory.h"
 
 #include "fluidicmachinemodel_global.h"
@@ -58,7 +58,7 @@ public:
     TubeEdge::TubeDirection getTubeDirection(int idSource, int idTarget) throw(std::invalid_argument);
 
     void addNode(std::shared_ptr<FluidicMachineNode> node) throw(std::invalid_argument);
-    int emplaceContainer(int numPins, ContainerType type, double maxVolume);
+    int emplaceContainer(int numPins, ContainerNode::ContainerType type, double maxVolume);
     int emplacePump(int numPins, PumpNode::PumpType type, std::shared_ptr<Function> pumpFunction) throw(std::invalid_argument);
     int emplaceValve(int numPins, const ValveNode::TruthTable & truthTable,
                   std::shared_ptr<Function> valveRouteFunction) throw(std::invalid_argument);

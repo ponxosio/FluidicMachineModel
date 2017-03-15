@@ -3,8 +3,9 @@
 
 #include <type_traits>
 
+#include <commonmodel/functions/function.h>
+
 #include "fluidicnode/fluidicmachinenode.h"
-#include "fluidicnode/functions/function.h"
 
 class PumpNode : public FluidicMachineNode
 {

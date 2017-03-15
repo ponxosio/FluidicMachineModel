@@ -10,10 +10,10 @@ ValveNode::ValveNode(const ValveNode & node) :
 ValveNode::ValveNode(int idNode, int numPins, const TruthTable & truthTable, std::shared_ptr<Function> valveRouteFunction) throw (std::invalid_argument) :
     FluidicMachineNode(idNode, numPins)
 {
-    if(valveRouteFunction->getAceptedOp() != route) {
+    if(valveRouteFunction->getAceptedOp() != Function::route) {
         throw(std::invalid_argument("ValveNode's valveRouteFunction must be capable of route"));
     }
-    availableFunctions.addOperation(valveRouteFunction);
+    ComponentInterface::availableFunctions.addOperation(valveRouteFunction);
 
     try {
         checkTruthTableFormat(truthTable);

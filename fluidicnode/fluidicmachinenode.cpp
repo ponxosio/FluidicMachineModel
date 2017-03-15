@@ -1,13 +1,13 @@
 #include "fluidicmachinenode.h"
 
 FluidicMachineNode::FluidicMachineNode() :
-    Node()
+    Node(), ComponentInterface()
 {
     this->numberOfPins = 0;
 }
 
 FluidicMachineNode::FluidicMachineNode(const FluidicMachineNode & node) :
-    Node(node), availableFunctions(node.availableFunctions)
+    Node(node), ComponentInterface(node)
 {
     this->numberOfPins = node.numberOfPins;
 
@@ -17,7 +17,7 @@ FluidicMachineNode::FluidicMachineNode(const FluidicMachineNode & node) :
 }
 
 FluidicMachineNode::FluidicMachineNode(int containerID, int numberOfPins) :
-    Node(containerID)
+    Node(containerID), ComponentInterface()
 {
     this->numberOfPins = numberOfPins;
 }
@@ -49,19 +49,15 @@ std::tuple<int,int> FluidicMachineNode::getTubeIdConnectedToPin(int id) throw (s
     }
 }
 
-const FunctionSet FluidicMachineNode::getAvailableFunctions() {
-    return availableFunctions;
-}
-
 bool FluidicMachineNode::canDoOperations(unsigned long mask) {
-    return availableFunctions.canDoOperations(mask);
+    return ComponentInterface::availableFunctions.canDoOperations(mask);
 }
 
-double FluidicMachineNode::doOperation(OperationType op, int nargs, ...) throw (std::invalid_argument) {
+MultiUnitsWrapper* FluidicMachineNode::doOperation(Function::OperationType op, int nargs, ...) throw (std::invalid_argument) {
     try {
         va_list args;
         va_start(args, nargs);
-        double returnedValue = availableFunctions.doOperation(op, nargs, args);
+        MultiUnitsWrapper* returnedValue = availableFunctions.doOperation(op, nargs, args);
         va_end(args);
         return returnedValue;
     } catch (std::invalid_argument & e) {
@@ -69,7 +65,7 @@ double FluidicMachineNode::doOperation(OperationType op, int nargs, ...) throw (
     }
 }
 
-double FluidicMachineNode::getMinVolume(OperationType op) throw (std::invalid_argument) {
+units::Volume FluidicMachineNode::getMinVolume(Function::OperationType op) throw (std::invalid_argument) {
     try {
         return availableFunctions.getMinVolume(op);
     } catch (std::invalid_argument & e) {
@@ -78,10 +74,10 @@ double FluidicMachineNode::getMinVolume(OperationType op) throw (std::invalid_ar
 }
 
 void FluidicMachineNode::setFactory(std::shared_ptr<PluginAbstractFactory> factory) {
-    availableFunctions.setFactory(factory);
+    ComponentInterface::availableFunctions.setFactory(factory);
 }
 
-void FluidicMachineNode::setFactory(OperationType op, std::shared_ptr<PluginAbstractFactory> factory) throw(std::invalid_argument) {
+void FluidicMachineNode::setFactory(Function::OperationType op, std::shared_ptr<PluginAbstractFactory> factory) throw(std::invalid_argument) {
     try {
         availableFunctions.setFactory(op, factory);
     } catch (std::invalid_argument & e) {

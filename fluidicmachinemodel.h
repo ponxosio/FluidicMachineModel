@@ -11,6 +11,10 @@
 #include <unordered_map>
 #include <vector>
 
+#include <commonmodel/modelinterface/modelinterface.h>
+#include <protocolGraph/ProtocolGraph.h>
+#include <utils/units.h>
+
 #include "machinegraph.h"
 #include "machine_graph_utils/graphrulesgenerator.h"
 #include "machine_graph_utils/machinestate.h"
@@ -41,9 +45,9 @@
  * calculate what state must the pumps and valves of the system have in order to maintain these flows and communicate with the physical
  * components of the machine to change this states.
  *
- * @sa TranslationStack, PluginAbstractFactory
+ * @sa TranslationStack, PluginAbstractFactory, ModelInterface
  */
-class FLUIDICMACHINEMODELSHARED_EXPORT FluidicMachineModel
+class FLUIDICMACHINEMODELSHARED_EXPORT FluidicMachineModel : public ModelInterface
 {   
 public:
     /**
@@ -73,6 +77,48 @@ public:
     virtual ~FluidicMachineModel();
 
     /**
+     * @brief canDoMovement returns true for 'continuous' and 'discrete' movement
+     *
+     * canDoMovement returns true if the mask contains the flags 'continuous', 'discrete'
+     * or both, false otherwise.
+     *
+     * @param mask mask with the movements flags to check.
+     * @return true if the movements flags are 'continuos', 'discrete' or both.
+     *
+     * @sa ModelInterface
+     */
+    virtual bool canDoMovement(unsigned long mask);
+    /**
+     * @brief findProtocolRelation try to make a relation between a protocol and this machine.
+     *
+     * findProtocolRelation try to make a relation between a protocol and this machine. If the relation if found an object
+     * is returned that stores and allows to access the relations between the protocol's virtual container names and the
+     * node ids of this machine.
+     *
+     * @param protocol pointer to a protocol
+     * @return a pointer to a mapping object that stores the relation between the virtual containers name of the protocol
+     * and the ids nodes of this machine.
+     *
+     * @exception an invalid_argument exception is thrown if the system can't find a relation between the protocol and
+     * this machine.
+     *
+     * @sa MappingInterface
+     */
+    virtual std::shared_ptr<MappingInterface> findProtocolRelation(std::shared_ptr<ProtocolGraph> protocol) throw(std::invalid_argument);
+
+    /**
+     * @brief getComponent returns a particular node as a ComponentInterface
+     *
+     * getComponent returns the node with the corresponding ID as a ComponentInterface.
+     *
+     * @param virtualContainer name of the virtual container of the protocol.
+     * @return a pointer to the corresponding component.
+     *
+     * @exception an invalid_argument exception is thrown if the id does not match any node id in the graph.
+     */
+    virtual std::shared_ptr<ComponentInterface> getComponent(int nodeId) throw(std::invalid_argument);
+
+    /**
      * @brief loadContainer specifies that a container is loaded with a liquid.
      *
      * loadContainer specifies that a container is loaded with a certain amunt of liquid,
@@ -82,8 +128,9 @@ public:
      * a container node.
      * @param volume loaded in the container.
      */
-    void loadContainer(short int id, float volume) throw(std::invalid_argument);
+    virtual void loadContainer(short int id, units::Volume volume) throw(std::invalid_argument);
 
+    virtual void transferLiquid(int sourceId, int targetId,  units::Volume volume) throw(std::invalid_argument);
     /**
      * @brief setContinuousFlow set a new flow betwen two nodes.
      *
@@ -98,7 +145,7 @@ public:
      *
      * @sa calculateNewRoute(), ratePrecisionInteger, ratePrecisionDecimal, MachineFlow
      */
-    void setContinuousFlow(int idStart, int idEnd, float flowRate);
+    virtual void setContinuousFlow(int idStart, int idEnd, units::Volumetric_Flow flowRate);
     /**
      * @brief setContinuousFlow set a new flow betwen two nodes.
      *
@@ -114,7 +161,7 @@ public:
      *
      * @sa calculateNewRoute(), ratePrecisionInteger, ratePrecisionDecimal, MachineFlow
      */
-    void setContinuousFlow(const std::vector<int> & containersIds, float flowRate) throw(std::invalid_argument);
+    virtual void setContinuousFlow(const std::vector<int> & containersIds, units::Volumetric_Flow flowRate) throw(std::invalid_argument);
 
     /**
      * @brief stopContinuousFlow stop all flows that starts and ends with the corrsponding nodes.
@@ -132,7 +179,7 @@ public:
      *
      * @sa calculateNewRoute(), MachineFlow
      */
-    void stopContinuousFlow(int idStart, int idEnd);
+    virtual void stopContinuousFlow(int idStart, int idEnd);
 
     /**
      * @brief stopContinuousFlow stop all flows that starts and ends with the corrsponding nodes.
@@ -151,10 +198,10 @@ public:
      *
      * @sa calculateNewRoute(), MachineFlow
      */
-    void stopContinuousFlow(const std::vector<int> & containersIds) throw(std::invalid_argument);
+    virtual void stopContinuousFlow(const std::vector<int> & containersIds) throw(std::invalid_argument);
 
     /**
-     * @brief calculateNewRoute sends a new query to the constraint engine and send comminucates the changes to the pyshical devices.
+     * @brief processFlows sends a new query to the constraint engine and send comminucates the changes to the pyshical devices.
      *
      * Sends a new query to the constraint engine with the actuals flows in the machine set or stop using setContinuosFlow and
      * stopContinuos flow methods. The constraints engine returns the new states the valves and pumps must be in order to mantain
@@ -163,7 +210,7 @@ public:
      *
      * @sa RoutingEngine, rules
      */
-    void calculateNewRoute() throw(std::runtime_error);
+    virtual void processFlows() throw(std::runtime_error);
 
     /**
      * @brief setTranslationStack sets the TransaltionStack of the system, this is the object that interfaces with the constraints engine.
@@ -206,7 +253,21 @@ public:
      */
     std::shared_ptr<FluidicMachineNode> getNode(int id) throw(std::invalid_argument);
 
+    /**
+     * @brief setDefaultRateUnits defaults units a rate will be send to the plugin system.
+     *
+     * setDefaultRateUnits defaults units a rate will be send to the plugin system. Any flow set
+     * will be converted to this units before being sent to the constraints solver because it cannot
+     * manage units. This value must be cohesive with the range of values the pumps of the machines
+     * can operate so the constraint solver can use smaller numbers to avoid overflow_exceptions.
+     *
+     * @param defaultUnits volumetric_flow default units
+     */
+    inline void setDefaultRateUnits(units::Volumetric_Flow defaultUnits) {
+        this->defaultRateUtis = defaultUnits;
+    }
 protected:
+    units::Volumetric_Flow defaultRateUtis;
     /**
      * @brief maxOpenContainer indicates maximun number of open container that the graph can has.
      *
@@ -312,7 +373,7 @@ protected:
      *
      * @sa MachineState, RoutingEngine, MachineFlow
      */
-    void addStack2State(const std::deque<short int> & queue, float rate, MachineState & state) throw(std::invalid_argument);
+    void addStack2State(const std::deque<short int> & queue, units::Volumetric_Flow rate, MachineState & state) throw(std::invalid_argument);
     /**
      * @brief sendActualState2components send the state of the pumps and valves of the actual machine state to the physical components
      *

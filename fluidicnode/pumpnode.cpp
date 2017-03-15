@@ -9,12 +9,12 @@ PumpNode::PumpNode(const PumpNode & node) :
 PumpNode::PumpNode(int idNode, int numPins, PumpType type, std::shared_ptr<Function> pumpFunction) throw (std::invalid_argument) :
     FluidicMachineNode(idNode, numPins)
 {
-   if (pumpFunction->getAceptedOp() != pump) {
+   if (pumpFunction->getAceptedOp() != Function::pump) {
         throw (std::invalid_argument("PumpNode's pumpFunction must be capable of pump"));
    }
 
     this->type = type;
-    this->availableFunctions.addOperation(pumpFunction);
+    ComponentInterface::availableFunctions.addOperation(pumpFunction);
 }
 
 PumpNode::~PumpNode() {

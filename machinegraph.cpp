@@ -211,7 +211,7 @@ void MachineGraph::addNode(std::shared_ptr<FluidicMachineNode> node) throw(std::
     if(graphPtr->getNode(node->getContainerId()) == NULL) {
         if (std::shared_ptr<ContainerNode> container = std::dynamic_pointer_cast<ContainerNode>(node)) {
            graphPtr->addNode(node);
-           if (container->getContainerType() == open) {
+           if (container->getContainerType() == ContainerNode::open) {
                int liquidId = luquidIdserie.getNextValue();
                openContainerLiquidIdMap.insert(std::make_pair(node->getContainerId(), liquidId));
 
@@ -234,12 +234,12 @@ void MachineGraph::addNode(std::shared_ptr<FluidicMachineNode> node) throw(std::
     }
 }
 
-int MachineGraph::emplaceContainer(int numPins, ContainerType type, double maxVolume) {
+int MachineGraph::emplaceContainer(int numPins, ContainerNode::ContainerType type, double maxVolume) {
     int id = sequence.getNextValue();
     std::shared_ptr<FluidicMachineNode> node = std::make_shared<ContainerNode>(id, numPins, type, maxVolume);
     graphPtr->addNode(node);
 
-    if (type == open) {
+    if (type == ContainerNode::open) {
         int liquidId = luquidIdserie.getNextValue();
         openContainerLiquidIdMap.insert(std::make_pair(id, liquidId));
 

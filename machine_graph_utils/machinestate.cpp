@@ -66,6 +66,7 @@ void MachineState::setAllStates(const std::unordered_map<std::string, long long>
                 overridePumpDir(name, value);
                 break;
             case VariableNominator::rate:
+
                 overridePumpRate(name, value);
                 break;
             case VariableNominator::valve:

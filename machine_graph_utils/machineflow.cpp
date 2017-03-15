@@ -9,7 +9,7 @@ MachineFlow::~MachineFlow() {
 
 }
 
-void MachineFlow::addFlow(short int idSource, short int idTarget, float rate) {
+void MachineFlow::addFlow(short int idSource, short int idTarget, units::Volumetric_Flow rate) {
     bool appended = false;
     for (auto it = actual.begin(); !appended && it != actual.end(); ++it) {
         appended = tryAppend(*it, idSource, idTarget, rate);
@@ -62,7 +62,7 @@ std::string MachineFlow::flowToStr() {
     return stream.str();
 }
 
-bool MachineFlow::tryAppend(PathRateTuple & tuple, short int idSource, short int idTarget, float rate) {
+bool MachineFlow::tryAppend(PathRateTuple & tuple, short int idSource, short int idTarget, units::Volumetric_Flow rate) {
     bool suceed = (rate == std::get<1>(tuple));
     if (suceed) {
         suceed = false;
@@ -105,8 +105,8 @@ void MachineFlow::mergeStacks() {
         for(auto it_i = actual.begin(); it_i != actual.end(); ) {
             changes = false;
             for (auto it_j = it_i + 1; !changes && it_j != actual.end(); ++ it_j) {
-                double rate_i = std::get<1>(*it_i);
-                double rate_j = std::get<1>(*it_j);
+                units::Volumetric_Flow rate_i = std::get<1>(*it_i);
+                units::Volumetric_Flow rate_j = std::get<1>(*it_j);
                 if (rate_i == rate_j) {
                     std::deque<short int> stack_i = std::get<0>(*it_i);
                     std::deque<short int> & stack_j = std::get<0>(*it_j);
