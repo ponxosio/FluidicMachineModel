@@ -36,7 +36,7 @@ std::shared_ptr<ComponentInterface> FluidicMachineModel::getComponent(int virtua
     return NULL;
 }
 
-void FluidicMachineModel::loadContainer(short int id, units::Volume volume) throw(std::invalid_argument) {
+void FluidicMachineModel::loadContainer(int id, units::Volume volume) throw(std::invalid_argument) {
     auto finded = graph->getOpenContainerLiquidIdMap().find(id);
     if (finded != graph->getOpenContainerLiquidIdMap().end()) {
         std::shared_ptr<ContainerNode> openContainer = std::dynamic_pointer_cast<ContainerNode>(graph->getNode(id));

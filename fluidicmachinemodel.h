@@ -116,7 +116,7 @@ public:
      *
      * @exception an invalid_argument exception is thrown if the id does not match any node id in the graph.
      */
-    virtual std::shared_ptr<ComponentInterface> getComponent(int nodeId) throw(std::invalid_argument);
+    virtual std::shared_ptr<ComponentInterface> getComponent(int virtualContainer) throw(std::invalid_argument);
 
     /**
      * @brief loadContainer specifies that a container is loaded with a liquid.
@@ -128,7 +128,7 @@ public:
      * a container node.
      * @param volume loaded in the container.
      */
-    virtual void loadContainer(short int id, units::Volume volume) throw(std::invalid_argument);
+    virtual void loadContainer(int id, units::Volume volume) throw(std::invalid_argument);
 
     virtual void transferLiquid(int sourceId, int targetId,  units::Volume volume) throw(std::invalid_argument);
     /**
