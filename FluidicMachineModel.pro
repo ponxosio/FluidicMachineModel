@@ -27,72 +27,6 @@ TEMPLATE = lib
 
 DEFINES += FLUIDICMACHINEMODEL_LIBRARY
 
-SOURCES += fluidicmachinemodel.cpp \
-    rules/equality.cpp \
-    rules/conjunction.cpp \
-    rules/arithmetic/binaryoperation.cpp \
-    rules/arithmetic/integernumber.cpp \
-    rules/arithmetic/variable.cpp \
-    fluidicedge/tubeedge.cpp \
-    fluidicnode/fluidicmachinenode.cpp \
-    fluidicnode/pumpnode.cpp \
-    fluidicnode/valvenode.cpp \
-    fluidicnode/containernode.cpp \
-    machine_graph_utils/machinestate.cpp \
-    machine_graph_utils/machineflow.cpp \
-    rules/variabledomain.cpp \
-    rules/arithmetic/unaryoperation.cpp \
-    machinegraph.cpp \
-    machine_graph_utils/variablenominator.cpp \
-    machine_graph_utils/graphrulesgenerator.cpp \
-    machine_graph_utils/rules_generation/commomrulesoperations.cpp \
-    machine_graph_utils/rules_generation/domaingenerator.cpp \
-    machine_graph_utils/rules_generation/shortstatepredicategenerator.cpp \
-    machine_graph_utils/rules_generation/labelcombinationsiterator.cpp \
-    machine_graph_utils/machinegraphiterator.cpp \
-    machine_graph_utils/machinegraphpressureiterator.cpp \
-    plugininterface/pluginconfiguration.cpp
-
-HEADERS += fluidicmachinemodel.h\
-        fluidicmachinemodel_global.h \
-    rules/rule.h \
-    rules/arithmetic/arithmeticoperable.h \
-    rules/predicate.h \
-    rules/equality.h \
-    rules/conjunction.h \
-    rules/arithmetic/binaryoperation.h \
-    rules/arithmetic/integernumber.h \
-    rules/arithmetic/variable.h \
-    fluidicedge/tubeedge.h \
-    fluidicnode/fluidicmachinenode.h \
-    fluidicnode/pumpnode.h \
-    fluidicnode/valvenode.h \
-    fluidicnode/containernode.h \
-    machine_graph_utils/machinestate.h \
-    machine_graph_utils/machineflow.h \
-    rules/variabledomain.h \
-    rules/arithmetic/unaryoperation.h \
-    machinegraph.h \
-    machine_graph_utils/variablenominator.h \
-    machine_graph_utils/graphrulesgenerator.h \
-    machine_graph_utils/rules_generation/commomrulesoperations.h \
-    machine_graph_utils/rules_generation/domaingenerator.h \
-    machine_graph_utils/rules_generation/shortstatepredicategenerator.h \
-    machine_graph_utils/rules_generation/label.h \
-    machine_graph_utils/rules_generation/labelcombinationsiterator.h \
-    machine_graph_utils/machinegraphiterator.h \
-    machine_graph_utils/machinegraphpressureiterator.h \
-    constraintssolverinterface/routingengine.h \
-    constraintssolverinterface/translationstack.h \
-    plugininterface/heaterpluginproduct.h \
-    plugininterface/lightpluginproduct.h \
-    plugininterface/odsensorpluginproduct.h \
-    plugininterface/pluginabstractfactory.h \
-    plugininterface/pluginconfiguration.h \
-    plugininterface/pumppluginproduct.h \
-    plugininterface/stirerpluginproduct.h \
-    plugininterface/valvepluginproduct.h
-
 unix {
     target.path = /usr/lib
     INSTALLS += target
@@ -125,3 +59,62 @@ debug {
 }
 
 INCLUDEPATH += X:\libraries\cereal-1.2.2\include
+
+HEADERS += \
+    fluidicmachinemodel/constraintssolverinterface/routingengine.h \
+    fluidicmachinemodel/constraintssolverinterface/translationstack.h \
+    fluidicmachinemodel/fluidicedge/tubeedge.h \
+    fluidicmachinemodel/fluidicnode/containernode.h \
+    fluidicmachinemodel/fluidicnode/fluidicmachinenode.h \
+    fluidicmachinemodel/fluidicnode/pumpnode.h \
+    fluidicmachinemodel/fluidicnode/valvenode.h \
+    fluidicmachinemodel/machine_graph_utils/rules_generation/commomrulesoperations.h \
+    fluidicmachinemodel/machine_graph_utils/rules_generation/domaingenerator.h \
+    fluidicmachinemodel/machine_graph_utils/rules_generation/label.h \
+    fluidicmachinemodel/machine_graph_utils/rules_generation/labelcombinationsiterator.h \
+    fluidicmachinemodel/machine_graph_utils/rules_generation/shortstatepredicategenerator.h \
+    fluidicmachinemodel/machine_graph_utils/graphrulesgenerator.h \
+    fluidicmachinemodel/machine_graph_utils/machineflow.h \
+    fluidicmachinemodel/machine_graph_utils/machinegraphiterator.h \
+    fluidicmachinemodel/machine_graph_utils/machinegraphpressureiterator.h \
+    fluidicmachinemodel/machine_graph_utils/machinestate.h \
+    fluidicmachinemodel/machine_graph_utils/variablenominator.h \
+    fluidicmachinemodel/rules/arithmetic/arithmeticoperable.h \
+    fluidicmachinemodel/rules/arithmetic/binaryoperation.h \
+    fluidicmachinemodel/rules/arithmetic/integernumber.h \
+    fluidicmachinemodel/rules/arithmetic/unaryoperation.h \
+    fluidicmachinemodel/rules/arithmetic/variable.h \
+    fluidicmachinemodel/rules/conjunction.h \
+    fluidicmachinemodel/rules/equality.h \
+    fluidicmachinemodel/rules/predicate.h \
+    fluidicmachinemodel/rules/rule.h \
+    fluidicmachinemodel/rules/variabledomain.h \
+    fluidicmachinemodel/fluidicmachinemodel.h \
+    fluidicmachinemodel/fluidicmachinemodel_global.h \
+    fluidicmachinemodel/machinegraph.h
+
+SOURCES += \
+    fluidicmachinemodel/fluidicedge/tubeedge.cpp \
+    fluidicmachinemodel/fluidicnode/containernode.cpp \
+    fluidicmachinemodel/fluidicnode/fluidicmachinenode.cpp \
+    fluidicmachinemodel/fluidicnode/pumpnode.cpp \
+    fluidicmachinemodel/fluidicnode/valvenode.cpp \
+    fluidicmachinemodel/machine_graph_utils/rules_generation/commomrulesoperations.cpp \
+    fluidicmachinemodel/machine_graph_utils/rules_generation/domaingenerator.cpp \
+    fluidicmachinemodel/machine_graph_utils/rules_generation/labelcombinationsiterator.cpp \
+    fluidicmachinemodel/machine_graph_utils/rules_generation/shortstatepredicategenerator.cpp \
+    fluidicmachinemodel/machine_graph_utils/graphrulesgenerator.cpp \
+    fluidicmachinemodel/machine_graph_utils/machineflow.cpp \
+    fluidicmachinemodel/machine_graph_utils/machinegraphiterator.cpp \
+    fluidicmachinemodel/machine_graph_utils/machinegraphpressureiterator.cpp \
+    fluidicmachinemodel/machine_graph_utils/machinestate.cpp \
+    fluidicmachinemodel/machine_graph_utils/variablenominator.cpp \
+    fluidicmachinemodel/rules/arithmetic/binaryoperation.cpp \
+    fluidicmachinemodel/rules/arithmetic/integernumber.cpp \
+    fluidicmachinemodel/rules/arithmetic/unaryoperation.cpp \
+    fluidicmachinemodel/rules/arithmetic/variable.cpp \
+    fluidicmachinemodel/rules/conjunction.cpp \
+    fluidicmachinemodel/rules/equality.cpp \
+    fluidicmachinemodel/rules/variabledomain.cpp \
+    fluidicmachinemodel/fluidicmachinemodel.cpp \
+    fluidicmachinemodel/machinegraph.cpp
