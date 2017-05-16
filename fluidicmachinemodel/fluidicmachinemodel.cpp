@@ -142,6 +142,29 @@ void FluidicMachineModel::processFlows() throw(std::runtime_error) {
     }
 }
 
+bool FluidicMachineModel::checkFlows(const MachineFlow::FlowsVector & flows2Set) throw(std::runtime_error) {
+    bool possible = false;
+    MachineState containers2Set(actualFullMachineState.getRatePrecisionInteger(), actualFullMachineState.getRatePrecisionDecimal());
+
+    try {
+        for(const MachineFlow::PathRateTuple & tuple: flows2Set) {
+            addStack2State(std::get<0>(tuple), std::get<1>(tuple), containers2Set);
+        }
+        if (!routingEngine) {
+            routingEngine = translateRules();
+        }
+        std::unordered_map<std::string, long long> newState;
+        if (routingEngine->calculateNewRoute(containers2Set.getAllContainersTubes(), newState)) {
+            possible = true;
+        }
+    } catch (std::invalid_argument & e) {
+        throw(std::runtime_error("FluidicMachineModel::checkFlows(): invalid argument error, message:" + std::string(e.what())));
+    } catch (std::runtime_error & e) {
+        throw(std::runtime_error("FluidicMachineModel::checkFlows():" + std::string(e.what())));
+    }
+    return possible;
+}
+
 void FluidicMachineModel::addStack2State(const std::deque<short int> & queue, units::Volumetric_Flow rate, MachineState & state)
     throw(std::invalid_argument)
 {

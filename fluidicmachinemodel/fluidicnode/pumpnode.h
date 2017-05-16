@@ -23,7 +23,7 @@ public:
     //getters & setters
     PumpType getType();
 
-    inline virtual Node* clone() {
+    inline virtual Node* clone() const {
         return new PumpNode(*this);
     }
 

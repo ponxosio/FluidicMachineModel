@@ -8,9 +8,7 @@
 
 #include "fluidicmachinemodel/fluidicmachinemodel_global.h"
 
-
-
-class UNARYOPERATION_EXPORT UnaryOperation : public ArithmeticOperable
+class FLUIDICMODEL_UNARYOPERATION_EXPORT UnaryOperation : public ArithmeticOperable
 {
 public:
     typedef enum UnaryOperators_ {

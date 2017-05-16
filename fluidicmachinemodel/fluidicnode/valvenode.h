@@ -28,7 +28,7 @@ public:
     inline const TruthTable & getTruthTable() {
         return truthTable;
     }
-    inline virtual Node* clone() {
+    inline virtual Node* clone() const {
         return new ValveNode(*this);
     }
 

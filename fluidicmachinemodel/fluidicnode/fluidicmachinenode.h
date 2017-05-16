@@ -28,7 +28,7 @@ public:
     void setFactory(std::shared_ptr<PluginAbstractFactory> factory);
     void setFactory(Function::OperationType op, std::shared_ptr<PluginAbstractFactory> factory) throw(std::invalid_argument);
 
-    inline virtual Node* clone() = 0;
+    inline virtual Node* clone() const = 0;
 
 protected:
     int numberOfPins;

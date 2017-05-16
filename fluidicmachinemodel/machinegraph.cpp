@@ -60,7 +60,7 @@ void MachineGraph::connectNodes(int idSource, int idTarget, int sourcePinToConne
     }
 }
 
-MachineGraph::GraphType::EdgeVectorPtr MachineGraph::getArrivingTubes(int nodeId) throw(std::invalid_argument) {
+MachineGraph::GraphType::EdgeVectorPtr MachineGraph::getArrivingTubes(int nodeId) const throw(std::invalid_argument) {
     auto edges = graphPtr->getArrivingEdges(nodeId);
     if (edges) {
         return edges;
@@ -69,7 +69,7 @@ MachineGraph::GraphType::EdgeVectorPtr MachineGraph::getArrivingTubes(int nodeId
     }
 }
 
-MachineGraph::GraphType::EdgeVectorPtr MachineGraph::getLeavingTubes(int nodeId) throw(std::invalid_argument) {
+MachineGraph::GraphType::EdgeVectorPtr MachineGraph::getLeavingTubes(int nodeId) const throw(std::invalid_argument) {
     auto edges = graphPtr->getLeavingEdges(nodeId);
     if (edges) {
         return edges;
@@ -78,7 +78,7 @@ MachineGraph::GraphType::EdgeVectorPtr MachineGraph::getLeavingTubes(int nodeId)
     }
 }
 
-MachineGraph::GraphType::EdgeTypePtr MachineGraph::getTube(int idSource, int idTarget) throw(std::invalid_argument) {
+MachineGraph::GraphType::EdgeTypePtr MachineGraph::getTube(int idSource, int idTarget) const throw(std::invalid_argument) {
     GraphType::EdgeTypePtr edge = graphPtr->getEdge(idSource, idTarget);
     if (edge != NULL) {
         return edge;
@@ -87,7 +87,7 @@ MachineGraph::GraphType::EdgeTypePtr MachineGraph::getTube(int idSource, int idT
     }
 }
 
-MachineGraph::GraphType::EdgeTypePtr MachineGraph::getTubeConnectedToPin(int nodeId, int pinNumber) throw(std::invalid_argument) {
+MachineGraph::GraphType::EdgeTypePtr MachineGraph::getTubeConnectedToPin(int nodeId, int pinNumber) const throw(std::invalid_argument) {
     GraphType::NodeTypePtr nodePtr = graphPtr->getNode(nodeId);
     if (nodePtr != NULL) {
         try {
@@ -283,11 +283,11 @@ int MachineGraph::emplaceValve(int numPins, const ValveNode::TruthTable & truthT
     }
 }
 
-bool MachineGraph::hasNode(int id) {
+bool MachineGraph::hasNode(int id) const {
     return (graphPtr->getNode(id) != NULL);
 }
 
-std::shared_ptr<FluidicMachineNode> MachineGraph::getNode(int id) throw(std::invalid_argument) {
+std::shared_ptr<FluidicMachineNode> MachineGraph::getNode(int id) const throw(std::invalid_argument) {
     GraphType::NodeTypePtr node = graphPtr->getNode(id);
     if (node != NULL) {
         return node;
@@ -296,7 +296,7 @@ std::shared_ptr<FluidicMachineNode> MachineGraph::getNode(int id) throw(std::inv
     }
 }
 
-std::shared_ptr<ContainerNode> MachineGraph::getContainer(int id) throw(std::invalid_argument) {
+std::shared_ptr<ContainerNode> MachineGraph::getContainer(int id) const throw(std::invalid_argument) {
     if (isContainer(id)) {
         GraphType::NodeTypePtr node = graphPtr->getNode(id);
         if (node != NULL) {
@@ -309,7 +309,7 @@ std::shared_ptr<ContainerNode> MachineGraph::getContainer(int id) throw(std::inv
     }
 }
 
-std::shared_ptr<FluidicMachineNode> MachineGraph::getFirstNodeOnlyLeavingTubes() throw(std::invalid_argument) {
+std::shared_ptr<FluidicMachineNode> MachineGraph::getFirstNodeOnlyLeavingTubes() const throw(std::invalid_argument) {
     std::shared_ptr<FluidicMachineNode> finded = NULL;
     GraphType::NodeMapPtr nodeMap = graphPtr->getAllNodes();
 
@@ -335,7 +335,7 @@ std::shared_ptr<FluidicMachineNode> MachineGraph::getFirstNodeOnlyLeavingTubes()
     return finded;
 }
 
-std::shared_ptr<PumpNode> MachineGraph::getPump(int id) throw(std::invalid_argument) {
+std::shared_ptr<PumpNode> MachineGraph::getPump(int id) const throw(std::invalid_argument) {
     if (isPump(id)) {
         GraphType::NodeTypePtr node = graphPtr->getNode(id);
         if (node != NULL) {
@@ -348,7 +348,7 @@ std::shared_ptr<PumpNode> MachineGraph::getPump(int id) throw(std::invalid_argum
     }
 }
 
-std::shared_ptr<ValveNode> MachineGraph::getValve(int id) throw(std::invalid_argument) {
+std::shared_ptr<ValveNode> MachineGraph::getValve(int id) const throw(std::invalid_argument) {
     if (isValve(id)) {
         GraphType::NodeTypePtr node = graphPtr->getNode(id);
         if (node != NULL) {
@@ -361,7 +361,7 @@ std::shared_ptr<ValveNode> MachineGraph::getValve(int id) throw(std::invalid_arg
     }
 }
 
-short int MachineGraph::getOpenContainerLiquidId(int idOpenContainer) throw (std::invalid_argument) {
+short int MachineGraph::getOpenContainerLiquidId(int idOpenContainer) const throw (std::invalid_argument) {
     auto finded = openContainerLiquidIdMap.find(idOpenContainer);
     if (finded != openContainerLiquidIdMap.end()) {
         return finded->second;

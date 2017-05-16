@@ -42,10 +42,10 @@ public:
     virtual ~MachineGraph();
 
     void connectNodes(int idSource, int idTarget, int sourcePinToConnect, int targetPinToConnect) throw(std::invalid_argument);
-    GraphType::EdgeVectorPtr getArrivingTubes(int nodeId) throw(std::invalid_argument);
-    GraphType::EdgeVectorPtr getLeavingTubes(int nodeId) throw(std::invalid_argument);
-    GraphType::EdgeTypePtr getTube(int idSource, int idTarget) throw(std::invalid_argument);
-    GraphType::EdgeTypePtr getTubeConnectedToPin(int nodeId, int pinNumber) throw(std::invalid_argument);
+    GraphType::EdgeVectorPtr getArrivingTubes(int nodeId) const throw(std::invalid_argument);
+    GraphType::EdgeVectorPtr getLeavingTubes(int nodeId) const throw(std::invalid_argument);
+    GraphType::EdgeTypePtr getTube(int idSource, int idTarget) const throw(std::invalid_argument);
+    GraphType::EdgeTypePtr getTubeConnectedToPin(int nodeId, int pinNumber) const throw(std::invalid_argument);
 
     void cutTube(int idSource, int idTarget) throw(std::invalid_argument);
     void uncutTube(int idSource, int idTarget) throw(std::invalid_argument);
@@ -63,64 +63,64 @@ public:
     int emplaceValve(int numPins, const ValveNode::TruthTable & truthTable,
                   std::shared_ptr<Function> valveRouteFunction) throw(std::invalid_argument);
 
-    bool hasNode(int id);
-    std::shared_ptr<FluidicMachineNode> getNode(int id) throw(std::invalid_argument);
-    std::shared_ptr<ContainerNode> getContainer(int id) throw(std::invalid_argument);
-    std::shared_ptr<FluidicMachineNode> getFirstNodeOnlyLeavingTubes() throw(std::invalid_argument);
-    std::shared_ptr<PumpNode> getPump(int id) throw(std::invalid_argument);
-    std::shared_ptr<ValveNode> getValve(int id) throw(std::invalid_argument);
+    bool hasNode(int id) const;
+    std::shared_ptr<FluidicMachineNode> getNode(int id) const throw(std::invalid_argument);
+    std::shared_ptr<ContainerNode> getContainer(int id) const throw(std::invalid_argument);
+    std::shared_ptr<FluidicMachineNode> getFirstNodeOnlyLeavingTubes() const throw(std::invalid_argument);
+    std::shared_ptr<PumpNode> getPump(int id) const throw(std::invalid_argument);
+    std::shared_ptr<ValveNode> getValve(int id) const throw(std::invalid_argument);
 
-    short int getOpenContainerLiquidId(int idOpenContainer) throw (std::invalid_argument);
+    short int getOpenContainerLiquidId(int idOpenContainer) const throw (std::invalid_argument);
 
     const std::vector<std::shared_ptr<MachineGraph>> & getConnectedComponents();
 
     void updatePluginFactory(std::shared_ptr<PluginAbstractFactory> factory);
 
-    inline bool isContainer(int id) {
+    inline bool isContainer(int id) const {
         return (isOpenContainer(id) || isCloseContainer(id));
     }
-    inline bool isOpenContainer(int id)  {
+    inline bool isOpenContainer(int id) const {
         return (openContainersSet.find(id) != openContainersSet.end());
     }
-    inline bool isCloseContainer(int id) {
+    inline bool isCloseContainer(int id) const {
         return (closeContainersSet.find(id) != closeContainersSet.end());
     }
-    inline bool isPump(int id) {
+    inline bool isPump(int id) const {
         return (pumpsSet.find(id) != pumpsSet.end());
     }
-    inline bool isValve(int id) {
+    inline bool isValve(int id) const {
         return (valvesSet.find(id) != valvesSet.end());
     }
-    inline bool areConnected(int idSource, int idTarget) {
+    inline bool areConnected(int idSource, int idTarget) const {
         return graphPtr->areConnected(idSource, idTarget);
     }
-    inline const unordered_set<int> & getPumpsIdsSet() {
+    inline const unordered_set<int> & getPumpsIdsSet() const {
         return pumpsSet;
     }
-    inline const unordered_set<int> & getValvesIdsSet() {
+    inline const unordered_set<int> & getValvesIdsSet() const {
         return valvesSet;
     }
-    inline const unordered_set<int> & getOpenContainersIdsSet() {
+    inline const unordered_set<int> & getOpenContainersIdsSet() const {
         return openContainersSet;
     }
-    inline const unordered_set<int> & getCloseContainersIdsSet() {
+    inline const unordered_set<int> & getCloseContainersIdsSet() const {
         return closeContainersSet;
     }
-    inline const unordered_map<short int, short int> & getOpenContainerLiquidIdMap() {
+    inline const unordered_map<short int, short int> & getOpenContainerLiquidIdMap() const {
         return openContainerLiquidIdMap;
     }
 
-    inline int getNumOpenContainers() {
+    inline int getNumOpenContainers() const {
         return openContainersSet.size();
     }
-    inline GraphType::UniqueEdgeMapPtr getAlledgesMap() {
+    inline GraphType::UniqueEdgeMapPtr getAlledgesMap() const {
         return graphPtr->getAllEdges();
     }
-    inline GraphType::NodeMapPtr getAllNodesMap() {
+    inline GraphType::NodeMapPtr getAllNodesMap() const {
         return graphPtr->getAllNodes();
     }
 
-    inline std::string toString() {
+    inline std::string toString() const {
         return graphPtr->toString();
     }
 

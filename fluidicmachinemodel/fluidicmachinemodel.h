@@ -211,6 +211,8 @@ public:
      */
     virtual void processFlows() throw(std::runtime_error);
 
+    bool checkFlows(const MachineFlow::FlowsVector & flows2Set) throw(std::runtime_error);
+
     /**
      * @brief setTranslationStack sets the TransaltionStack of the system, this is the object that interfaces with the constraints engine.
      *
@@ -265,8 +267,17 @@ public:
     inline void setDefaultRateUnits(units::Volumetric_Flow defaultUnits) {
         this->defaultRateUtis = defaultUnits;
     }
+
+    inline void setDefaultRateValue(double defaultRateValue) {
+        this->defaultRateValue = defaultRateValue;
+    }
+
+    inline const std::shared_ptr<const MachineGraph> getMachineGraph() const {
+        return graph;
+    }
 protected:
     units::Volumetric_Flow defaultRateUtis;
+    double defaultRateValue;
     /**
      * @brief maxOpenContainer indicates maximun number of open container that the graph can has.
      *

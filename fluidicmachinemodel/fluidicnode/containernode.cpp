@@ -28,15 +28,15 @@ void ContainerNode::addOperation(std::shared_ptr<Function> function) {
     ComponentInterface::availableFunctions.addOperation(function);
 }
 
-units::Volume ContainerNode::getMaxVolume() {
+const units::Volume & ContainerNode::getMaxVolume() const {
     return maxVolume;
 }
 
-units::Volume ContainerNode::getActualVolume() {
+const units::Volume & ContainerNode::getActualVolume() const {
     return actualVolume;
 }
 
-ContainerNode::ContainerType ContainerNode::getContainerType() {
+const ContainerNode::ContainerType & ContainerNode::getContainerType() const {
     return containerType;
 }
 
