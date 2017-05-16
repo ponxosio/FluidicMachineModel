@@ -21,9 +21,13 @@ public:
     void connectToPin(int pin, std::shared_ptr<TubeEdge> edge) throw (std::invalid_argument);
     std::tuple<int,int> getTubeIdConnectedToPin(int id) throw (std::invalid_argument);
 
-    virtual bool canDoOperations(unsigned long mask);
-    virtual MultiUnitsWrapper* doOperation(Function::OperationType op, int nargs, ...) throw (std::invalid_argument);
-    virtual units::Volume getMinVolume(Function::OperationType op) throw (std::invalid_argument);
+    virtual bool canDoOperations(unsigned long mask) const;
+    virtual std::shared_ptr<MultiUnitsWrapper> doOperation(Function::OperationType op, int nargs, ...) throw (std::invalid_argument);
+
+    virtual bool inWorkingRange(Function::OperationType op, int nargs, ...) const throw (std::invalid_argument);
+    virtual const std::shared_ptr<const ComparableRangeInterface> getComparableWorkingRange(Function::OperationType op) const;
+
+    virtual units::Volume getMinVolume(Function::OperationType op) const throw (std::invalid_argument);
 
     void setFactory(std::shared_ptr<PluginAbstractFactory> factory);
     void setFactory(Function::OperationType op, std::shared_ptr<PluginAbstractFactory> factory) throw(std::invalid_argument);

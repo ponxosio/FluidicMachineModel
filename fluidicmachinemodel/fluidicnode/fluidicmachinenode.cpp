@@ -49,23 +49,39 @@ std::tuple<int,int> FluidicMachineNode::getTubeIdConnectedToPin(int id) throw (s
     }
 }
 
-bool FluidicMachineNode::canDoOperations(unsigned long mask) {
-    return ComponentInterface::availableFunctions.canDoOperations(mask);
+bool FluidicMachineNode::canDoOperations(unsigned long mask) const {
+    return availableFunctions.canDoOperations(mask);
 }
 
-MultiUnitsWrapper* FluidicMachineNode::doOperation(Function::OperationType op, int nargs, ...) throw (std::invalid_argument) {
+bool FluidicMachineNode::inWorkingRange(Function::OperationType op, int nargs, ...) const throw (std::invalid_argument) {
     try {
         va_list args;
         va_start(args, nargs);
-        MultiUnitsWrapper* returnedValue = availableFunctions.doOperation(op, nargs, args);
+        bool returnedValue = availableFunctions.inWorkingRange(op, nargs, args);
         va_end(args);
         return returnedValue;
     } catch (std::invalid_argument & e) {
-        throw (std::invalid_argument(" container " + std::to_string(containerID) + " fail to doOperation, " + std::string(e.what())));
+        throw (std::invalid_argument("FluidicMachineNode::inWorkingRange. Exception: " + std::string(e.what())));
     }
 }
 
-units::Volume FluidicMachineNode::getMinVolume(Function::OperationType op) throw (std::invalid_argument) {
+const std::shared_ptr<const ComparableRangeInterface> FluidicMachineNode::getComparableWorkingRange(Function::OperationType op) const {
+    return availableFunctions.getComparableWorkingRange(op);
+}
+
+std::shared_ptr<MultiUnitsWrapper> FluidicMachineNode::doOperation(Function::OperationType op, int nargs, ...) throw (std::invalid_argument) {
+    try {
+        va_list args;
+        va_start(args, nargs);
+        std::shared_ptr<MultiUnitsWrapper> returnedValue = availableFunctions.doOperation(op, nargs, args);
+        va_end(args);
+        return returnedValue;
+    } catch (std::invalid_argument & e) {
+        throw (std::invalid_argument(" FluidicMachineNode::doOperation. Exception: " + std::string(e.what())));
+    }
+}
+
+units::Volume FluidicMachineNode::getMinVolume(Function::OperationType op) const throw (std::invalid_argument) {
     try {
         return availableFunctions.getMinVolume(op);
     } catch (std::invalid_argument & e) {
