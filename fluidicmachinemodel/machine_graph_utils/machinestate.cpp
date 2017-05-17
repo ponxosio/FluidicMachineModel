@@ -222,6 +222,17 @@ float MachineState::getPumpRate(int id) throw (std::invalid_argument) {
     }
 }
 
+void MachineState::overridePumpRateState(int id, long long state) throw(std::invalid_argument) {
+    std::string varName = VariableNominator::getPumpRateVarName(id);
+    auto it = pumpsRatesMap.find(varName);
+
+    if (it != tubesMap.end()) {
+        it->second = state;
+    } else {
+        throw(std::invalid_argument(std::to_string(id) + " is not present or is not a pump's rate"));
+    }
+}
+
 const std::unordered_map<std::string, long long> & MachineState::getAllPumpsDirVar() {
     return pumpsMap;
 }

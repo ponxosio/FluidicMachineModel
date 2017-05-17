@@ -69,7 +69,9 @@ public:
     FluidicMachineModel(std::shared_ptr<MachineGraph> graph,
                         std::shared_ptr<TranslationStack> translationStack = std::shared_ptr<TranslationStack>(),
                         short int ratePrecisionInteger = 3,
-                        short int ratePrecisionDecimal = 2) throw(std::overflow_error);
+                        short int ratePrecisionDecimal = 2,
+                        double defaultRate = 0,
+                        units::Volumetric_Flow defaultRateUnits = (units::ml / units::hr)) throw(std::overflow_error);
     /**
      * @brief ~FluidicMachineModel empty destructor
      */
@@ -129,7 +131,8 @@ public:
      */
     virtual void loadContainer(int id, units::Volume volume) throw(std::invalid_argument);
 
-    virtual void transferLiquid(int sourceId, int targetId,  units::Volume volume) throw(std::invalid_argument);
+    virtual units::Time transferLiquid(int sourceId, int targetId,  units::Volume volume) throw(std::invalid_argument);
+    virtual void stopTransferLiquid(int sourceId, int targetId) throw(std::invalid_argument);
     /**
      * @brief setContinuousFlow set a new flow betwen two nodes.
      *
@@ -254,6 +257,21 @@ public:
      */
     std::shared_ptr<FluidicMachineNode> getNode(int id) throw(std::invalid_argument);
 
+    inline void clearDisabledPumps() {
+        disabledPumps.clear();
+    }
+
+    inline void disablePump(int pumpId) {
+        disabledPumps.insert(pumpId);
+    }
+
+    inline void enablePump(int pumpId) {
+        auto finded = disabledPumps.find(pumpId);
+        if (finded != disabledPumps.end()) {
+            disabledPumps.erase(finded);
+        }
+    }
+
     /**
      * @brief setDefaultRateUnits defaults units a rate will be send to the plugin system.
      *
@@ -264,20 +282,28 @@ public:
      *
      * @param defaultUnits volumetric_flow default units
      */
-    inline void setDefaultRateUnits(units::Volumetric_Flow defaultUnits) {
-        this->defaultRateUtis = defaultUnits;
+    inline void setDefaultRate(double defaultRate) {
+        this->defaultRate = defaultRate;
     }
 
-    inline void setDefaultRateValue(double defaultRateValue) {
-        this->defaultRateValue = defaultRateValue;
+    inline void setDefaultRateUnits(units::Volumetric_Flow defaultRateUnits) {
+        this->defaultRateUnits = defaultRateUnits;
+    }
+
+    inline double getDefaultRate() const {
+        return defaultRate;
+    }
+
+    inline units::Volumetric_Flow getDefaultRateUnits() const {
+        return defaultRateUnits;
     }
 
     inline const std::shared_ptr<const MachineGraph> getMachineGraph() const {
         return graph;
     }
 protected:
-    units::Volumetric_Flow defaultRateUtis;
-    double defaultRateValue;
+    double defaultRate;
+    units::Volumetric_Flow defaultRateUnits;
     /**
      * @brief maxOpenContainer indicates maximun number of open container that the graph can has.
      *
@@ -343,6 +369,10 @@ protected:
      */
     std::shared_ptr<RoutingEngine> routingEngine;
     /**
+     * @brief disabledPumps vector with the id of the pumps that the system cannot use.
+     */
+    std::unordered_set<int> disabledPumps;
+    /**
      * @brief translateRules use the TranslationStack to translate the rules vector and a constructucts a new RoutingEngine.
      *
      * translateRules use the TranslationStack to translate the rules vector to a format the the constraint engine undestand,
@@ -392,6 +422,8 @@ protected:
      * communication.
      */
     void sendActualState2components() throw(std::runtime_error);
+
+    void setUnabledPumps(MachineState & machineState);
 };
 
 #endif // FLUIDICMACHINEMODEL_H

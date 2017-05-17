@@ -47,6 +47,7 @@ public:
     void emplacePumpVar(int id);
     long long getPumpDir(int id) throw (std::invalid_argument);
     float getPumpRate(int id) throw (std::invalid_argument);
+    void overridePumpRateState(int id, long long state) throw(std::invalid_argument);
     const std::unordered_map<std::string, long long> & getAllPumpsDirVar();
     const std::unordered_map<std::string, long long> & getAllPumpsRateVar();
 

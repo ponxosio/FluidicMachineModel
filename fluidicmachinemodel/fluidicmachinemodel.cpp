@@ -3,12 +3,15 @@
 FluidicMachineModel::FluidicMachineModel(std::shared_ptr<MachineGraph> graph,
                                          std::shared_ptr<TranslationStack> translationStack,
                                          short int ratePrecisionInteger,
-                                         short int ratePrecisionDecimal) throw(std::overflow_error) :
+                                         short int ratePrecisionDecimal,
+                                         double defaultRate,
+                                         units::Volumetric_Flow defaultRateUnits) throw(std::overflow_error) :
     actualFullMachineState(graph, ratePrecisionInteger, ratePrecisionDecimal)
 {
     this->graph = graph;
     this->translationStack = translationStack;
-    defaultRateUtis = units::ml / units::hr;
+    this->defaultRate = defaultRate;
+    this->defaultRateUnits = defaultRateUnits;
     maxOpenContainer = actualFullMachineState.getMaxOpenContainers();
 
     if (graph->getNumOpenContainers() > maxOpenContainer) {
@@ -52,8 +55,14 @@ void FluidicMachineModel::loadContainer(int id, units::Volume volume) throw(std:
     }
 }
 
-void FluidicMachineModel::transferLiquid(int sourceId, int targetId,  units::Volume volume) throw(std::invalid_argument) {
-    //TODO:
+units::Time FluidicMachineModel::transferLiquid(int sourceId, int targetId,  units::Volume volume) throw(std::invalid_argument) {
+    units::Time duration = volume / (defaultRate * defaultRateUnits);
+    flowEngine.addFlow(sourceId, targetId, (defaultRate * defaultRateUnits));
+    return duration;
+}
+
+void FluidicMachineModel::stopTransferLiquid(int sourceId, int targetId) throw(std::invalid_argument) {
+    flowEngine.removeFlow(sourceId, targetId);
 }
 
 void FluidicMachineModel::setContinuousFlow(int idStart, int idEnd, units::Volumetric_Flow flowRate) {
@@ -125,6 +134,8 @@ void FluidicMachineModel::processFlows() throw(std::runtime_error) {
         for(const MachineFlow::PathRateTuple & tuple: flows2Set) {
             addStack2State(std::get<0>(tuple), std::get<1>(tuple), containers2Set);
         }
+        setUnabledPumps(containers2Set);
+
         if (!routingEngine) {
             routingEngine = translateRules();
         }
@@ -150,6 +161,8 @@ bool FluidicMachineModel::checkFlows(const MachineFlow::FlowsVector & flows2Set)
         for(const MachineFlow::PathRateTuple & tuple: flows2Set) {
             addStack2State(std::get<0>(tuple), std::get<1>(tuple), containers2Set);
         }
+        setUnabledPumps(containers2Set);
+
         if (!routingEngine) {
             routingEngine = translateRules();
         }
@@ -173,7 +186,7 @@ void FluidicMachineModel::addStack2State(const std::deque<short int> & queue, un
         if(graph->getOpenContainerLiquidIdMap().find(queue.back()) != graph->getOpenContainerLiquidIdMap().end()) {
             try {
                 short int id = it_start->second;
-                units::Volumetric_Flow convertedFlow = rate.to(defaultRateUtis);
+                units::Volumetric_Flow convertedFlow = rate.to(defaultRateUnits);
                 long long stateValue = state.generateState(1 << id, convertedFlow());
 
                 state.emplaceContainerVar(id);
@@ -201,7 +214,7 @@ void FluidicMachineModel::addStack2State(const std::deque<short int> & queue, un
         double rate = (double)actualFullMachineState.getPumpRate(id);
 
         std::shared_ptr<FluidicMachineNode> graphNode = graph->getNode(id);
-        graphNode->doOperation(Function::pump, 2, dir, rate*defaultRateUtis);
+        graphNode->doOperation(Function::pump, 2, dir, rate*defaultRateUnits);
     }
 
     for (auto tuple: actualFullMachineState.getAllValves()) {
@@ -211,6 +224,12 @@ void FluidicMachineModel::addStack2State(const std::deque<short int> & queue, un
         std::shared_ptr<FluidicMachineNode> graphNode = graph->getNode(id);
         graphNode->doOperation(Function::route, 1, pos);
     }
+ }
+
+ void FluidicMachineModel::setUnabledPumps(MachineState & machineState) {
+     for(int pumpId : disabledPumps) {
+         machineState.overridePumpRateState(pumpId, 0);
+     }
  }
 
 std::shared_ptr<FluidicMachineNode> FluidicMachineModel::getNode(int id) throw(std::invalid_argument) {
