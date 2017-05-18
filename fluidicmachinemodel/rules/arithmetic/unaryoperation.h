@@ -8,15 +8,15 @@
 
 #include "fluidicmachinemodel/fluidicmachinemodel_global.h"
 
-class FLUIDICMODEL_UNARYOPERATION_EXPORT UnaryOperation : public ArithmeticOperable
+class FLUIDICMODEL_UNARYOPERATION_EXPORT RuleUnaryOperation : public ArithmeticOperable
 {
 public:
     typedef enum UnaryOperators_ {
         absolute_value,
     } UnaryOperators;
 
-    UnaryOperation(std::shared_ptr<ArithmeticOperable> operable, UnaryOperators op);
-    virtual ~UnaryOperation();
+    RuleUnaryOperation(std::shared_ptr<ArithmeticOperable> operable, UnaryOperators op);
+    virtual ~RuleUnaryOperation();
 
     virtual void fillTranslationStack(TranslationStack* stack);
 

@@ -68,19 +68,19 @@ std::shared_ptr<ArithmeticOperable> CommomRulesOperations::addVariables(const st
 }
 
 std::shared_ptr<ArithmeticOperable> CommomRulesOperations::calculateRate(std::shared_ptr<Variable> variable) {
-    std::shared_ptr<ArithmeticOperable> absVar = std::make_shared<UnaryOperation>(variable, UnaryOperation::absolute_value);
+    std::shared_ptr<ArithmeticOperable> absVar = std::make_shared<RuleUnaryOperation>(variable, RuleUnaryOperation::absolute_value);
     std::shared_ptr<ArithmeticOperable> powerNum = std::make_shared<IntegerNumber>(powerValue);
     return std::make_shared<BinaryOperation>(absVar, BinaryOperation::module, powerNum);
 }
 
 std::shared_ptr<ArithmeticOperable> CommomRulesOperations::calculateId(std::shared_ptr<Variable> variable) {
-    std::shared_ptr<ArithmeticOperable> absVar = std::make_shared<UnaryOperation>(variable, UnaryOperation::absolute_value);
+    std::shared_ptr<ArithmeticOperable> absVar = std::make_shared<RuleUnaryOperation>(variable, RuleUnaryOperation::absolute_value);
     std::shared_ptr<ArithmeticOperable> division = std::make_shared<BinaryOperation>(absVar, BinaryOperation::divide, power);
     return std::make_shared<BinaryOperation>(division, BinaryOperation::multiply, power);
 }
 
 std::shared_ptr<ArithmeticOperable> CommomRulesOperations::calculateIdNotPower(std::shared_ptr<Variable> variable) {
-    std::shared_ptr<ArithmeticOperable> absVar = std::make_shared<UnaryOperation>(variable, UnaryOperation::absolute_value);
+    std::shared_ptr<ArithmeticOperable> absVar = std::make_shared<RuleUnaryOperation>(variable, RuleUnaryOperation::absolute_value);
     return std::make_shared<BinaryOperation>(absVar, BinaryOperation::divide, power);
 }
 
@@ -165,6 +165,6 @@ std::shared_ptr<ArithmeticOperable> CommomRulesOperations::absoluteValue(std::sh
     if (op == NULL) {
         return NULL;
     } else {
-        return std::make_shared<UnaryOperation>(op, UnaryOperation::absolute_value);
+        return std::make_shared<RuleUnaryOperation>(op, RuleUnaryOperation::absolute_value);
     }
 }

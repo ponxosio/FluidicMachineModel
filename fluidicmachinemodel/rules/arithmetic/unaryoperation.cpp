@@ -1,17 +1,17 @@
 #include "unaryoperation.h"
 
-UnaryOperation::UnaryOperation(std::shared_ptr<ArithmeticOperable> operable, UnaryOperators op) :
+RuleUnaryOperation::RuleUnaryOperation(std::shared_ptr<ArithmeticOperable> operable, UnaryOperators op) :
     ArithmeticOperable()
 {
     this->operable = operable;
     this->op = op;
 }
 
-UnaryOperation::~UnaryOperation() {
+RuleUnaryOperation::~RuleUnaryOperation() {
 
 }
 
-void UnaryOperation::fillTranslationStack(TranslationStack* stack) {
+void RuleUnaryOperation::fillTranslationStack(TranslationStack* stack) {
     operable->fillTranslationStack(stack);
     stack->stackArithmeticUnaryOperation(op);
 }
