@@ -117,5 +117,4 @@ SOURCES += \
     fluidicmachinemodel/rules/equality.cpp \
     fluidicmachinemodel/rules/variabledomain.cpp \
     fluidicmachinemodel/fluidicmachinemodel.cpp \
-    fluidicmachinemodel/machinegraph.cpp \
-    fluidicmachinemodel/machine_graph_utils/mementomachineflow.cpp
+    fluidicmachinemodel/machinegraph.cpp
