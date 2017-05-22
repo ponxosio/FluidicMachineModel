@@ -1,25 +1,30 @@
 #ifndef MACHINEFLOW_H
 #define MACHINEFLOW_H
 
+#include <algorithm>
+#include <deque>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <deque>
-#include <algorithm>
 
-#include <utils/Utils.h>
+#include <utils/memento.h>
 #include <utils/units.h>
+#include <utils/Utils.h>
 
 #include "fluidicmachinemodel/fluidicmachinemodel_global.h"
 
 class MACHINE_FLOW_EXPORT MachineFlow
 {
+    friend class MachineFlowStringAdapter;
+
 public:
     typedef std::tuple<std::deque<short int>,units::Volumetric_Flow> PathRateTuple;
     typedef std::vector<PathRateTuple> FlowsVector;
 
     MachineFlow();
+    MachineFlow(const MachineFlow & mFlow);
     virtual ~MachineFlow();
 
     void addFlow(short int idSource, short int idTarget, units::Volumetric_Flow rate);
@@ -33,6 +38,14 @@ public:
         actual.clear();
     }
 
+    inline std::shared_ptr<Memento<MachineFlow>> createMemento() const {
+        return std::make_shared<Memento<MachineFlow>>(*this);
+    }
+
+    inline void restoreMemento(const Memento<MachineFlow> & memento) {
+        this->restoreState(memento.getState());
+    }
+
 protected:
     FlowsVector previous;
     FlowsVector actual;
@@ -41,6 +54,8 @@ protected:
     bool areCompatible(const std::deque<short int> & queue1, const std::deque<short int> & queue2);
     void removeZeroFlows(FlowsVector & flows);
     void mergeStacks();
+
+    void restoreState(const MachineFlow & state);
 };
 
 #endif // MACHINEFLOW_H

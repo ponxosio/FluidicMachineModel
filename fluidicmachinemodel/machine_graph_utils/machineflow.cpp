@@ -5,6 +5,12 @@ MachineFlow::MachineFlow()
 
 }
 
+MachineFlow::MachineFlow(const MachineFlow & mFlow) :
+    actual(mFlow.actual), previous(mFlow.previous)
+{
+
+}
+
 MachineFlow::~MachineFlow() {
 
 }
@@ -127,4 +133,17 @@ void MachineFlow::mergeStacks() {
             }
         }
     } while(changes);
+}
+
+void MachineFlow::restoreState(const MachineFlow & state) {
+    actual.clear();
+    previous.clear();
+
+    for(const auto & elem : state.actual) {
+        actual.push_back(elem);
+    }
+
+    for(const auto & elem : state.previous) {
+        previous.push_back(elem);
+    }
 }
