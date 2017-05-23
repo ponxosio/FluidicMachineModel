@@ -15,11 +15,11 @@
 #include <commonmodel/plugininterface/pluginabstractfactory.h>
 #include <protocolGraph/ProtocolGraph.h>
 #include <utils/units.h>
+#include <utils/machineflow.h>
 
 #include "fluidicmachinemodel/machinegraph.h"
 #include "fluidicmachinemodel/machine_graph_utils/graphrulesgenerator.h"
 #include "fluidicmachinemodel/machine_graph_utils/machinestate.h"
-#include "fluidicmachinemodel/machine_graph_utils/machineflow.h"
 #include "fluidicmachinemodel/machine_graph_utils/variablenominator.h"
 
 #include "fluidicmachinemodel/constraintssolverinterface/translationstack.h"

@@ -74,7 +74,6 @@ HEADERS += \
     fluidicmachinemodel/machine_graph_utils/rules_generation/labelcombinationsiterator.h \
     fluidicmachinemodel/machine_graph_utils/rules_generation/shortstatepredicategenerator.h \
     fluidicmachinemodel/machine_graph_utils/graphrulesgenerator.h \
-    fluidicmachinemodel/machine_graph_utils/machineflow.h \
     fluidicmachinemodel/machine_graph_utils/machinegraphiterator.h \
     fluidicmachinemodel/machine_graph_utils/machinegraphpressureiterator.h \
     fluidicmachinemodel/machine_graph_utils/machinestate.h \
@@ -104,7 +103,6 @@ SOURCES += \
     fluidicmachinemodel/machine_graph_utils/rules_generation/labelcombinationsiterator.cpp \
     fluidicmachinemodel/machine_graph_utils/rules_generation/shortstatepredicategenerator.cpp \
     fluidicmachinemodel/machine_graph_utils/graphrulesgenerator.cpp \
-    fluidicmachinemodel/machine_graph_utils/machineflow.cpp \
     fluidicmachinemodel/machine_graph_utils/machinegraphiterator.cpp \
     fluidicmachinemodel/machine_graph_utils/machinegraphpressureiterator.cpp \
     fluidicmachinemodel/machine_graph_utils/machinestate.cpp \
