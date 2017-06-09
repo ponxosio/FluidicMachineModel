@@ -133,6 +133,9 @@ public:
 
     virtual units::Time transferLiquid(int sourceId, int targetId,  units::Volume volume) throw(std::invalid_argument);
     virtual void stopTransferLiquid(int sourceId, int targetId) throw(std::invalid_argument);
+
+    virtual units::Time mix(int sourceId1, int sourceId2, int targetId,  units::Volume volume1, units::Volume volume2) throw(std::invalid_argument);
+    virtual void stopMix(int sourceId1, int sourceId2, int targetId) throw(std::invalid_argument);
     /**
      * @brief setContinuousFlow set a new flow betwen two nodes.
      *
@@ -242,7 +245,7 @@ public:
      *
      * @sa PluginAbstractFactory
      */
-    void updatePluginFactory(std::shared_ptr<PluginAbstractFactory> factory);
+    virtual void updatePluginFactory(std::shared_ptr<PluginAbstractFactory> factory);
 
     /**
      * @brief getNode return a pointer to the node with the corresponding id.

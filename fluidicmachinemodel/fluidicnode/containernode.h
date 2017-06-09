@@ -24,10 +24,13 @@ public:
 
     const units::Volume & getMaxVolume() const;
 
-    const units::Volume & getActualVolume() const;
     void setActualVolume(units::Volume volume);
 
     const ContainerType & getContainerType() const;
+
+    inline virtual units::Volume getActualVolume() const {
+        return actualVolume;
+    }
 
     inline virtual Node* clone() const {
         return new ContainerNode(*this);

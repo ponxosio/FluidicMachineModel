@@ -32,10 +32,6 @@ const units::Volume & ContainerNode::getMaxVolume() const {
     return maxVolume;
 }
 
-const units::Volume & ContainerNode::getActualVolume() const {
-    return actualVolume;
-}
-
 const ContainerNode::ContainerType & ContainerNode::getContainerType() const {
     return containerType;
 }

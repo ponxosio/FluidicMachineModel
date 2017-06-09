@@ -65,6 +65,24 @@ void FluidicMachineModel::stopTransferLiquid(int sourceId, int targetId) throw(s
     flowEngine.removeFlow(sourceId, targetId);
 }
 
+units::Time FluidicMachineModel::mix(
+        int sourceId1,
+        int sourceId2,
+        int targetId,
+        units::Volume volume1,
+        units::Volume volume2)
+    throw(std::invalid_argument)
+{
+    units::Time duration1 = transferLiquid(sourceId1, targetId, volume1);
+    units::Time duration2 = transferLiquid(sourceId2, targetId, volume2);
+    return (duration1 > duration2 ? duration1 : duration2);
+}
+
+void FluidicMachineModel::stopMix(int sourceId1, int sourceId2, int targetId) throw(std::invalid_argument) {
+    stopTransferLiquid(sourceId1, targetId);
+    stopTransferLiquid(sourceId2, targetId);
+}
+
 void FluidicMachineModel::setContinuousFlow(int idStart, int idEnd, units::Volumetric_Flow flowRate) {
     flowEngine.addFlow(idStart, idEnd, flowRate);
 }
@@ -170,8 +188,9 @@ bool FluidicMachineModel::checkFlows(const MachineFlow::FlowsVector & flows2Set)
         if (routingEngine->calculateNewRoute(containers2Set.getAllContainersTubes(), newState)) {
             possible = true;
         }
-    } catch (std::invalid_argument & e) {
-        throw(std::runtime_error("FluidicMachineModel::checkFlows(): invalid argument error, message:" + std::string(e.what())));
+    } catch (std::invalid_argument & ignored) {
+        //while checking the flows this exception is ignored, the system will try imposible flows.
+
     } catch (std::runtime_error & e) {
         throw(std::runtime_error("FluidicMachineModel::checkFlows():" + std::string(e.what())));
     }
@@ -228,6 +247,8 @@ void FluidicMachineModel::addStack2State(const std::deque<short int> & queue, un
 
  void FluidicMachineModel::setUnabledPumps(MachineState & machineState) {
      for(int pumpId : disabledPumps) {
+         machineState.emplacePumpVar(pumpId);
+         machineState.overridePumpDirState(pumpId, 0);
          machineState.overridePumpRateState(pumpId, 0);
      }
  }

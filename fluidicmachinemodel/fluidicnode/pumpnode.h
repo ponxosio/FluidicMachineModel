@@ -27,6 +27,10 @@ public:
         return new PumpNode(*this);
     }
 
+    inline virtual units::Volume getActualVolume() const {
+        return 0 * units::ml;
+    }
+
 protected:
     PumpType type;
 };

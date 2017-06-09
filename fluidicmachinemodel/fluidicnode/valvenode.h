@@ -38,6 +38,11 @@ public:
     inline void setActualPosition(int actualPosition) {
         this->actualPosition = actualPosition;
     }
+
+    inline virtual units::Volume getActualVolume() const {
+        return 0 * units::ml;
+    }
+
 protected:
     int actualPosition;
     TruthTable truthTable;
