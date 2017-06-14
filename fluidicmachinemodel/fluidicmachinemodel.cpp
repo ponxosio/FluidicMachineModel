@@ -197,6 +197,14 @@ bool FluidicMachineModel::checkFlows(const MachineFlow::FlowsVector & flows2Set)
     return possible;
 }
 
+void FluidicMachineModel::setTranslationStack(std::shared_ptr<TranslationStack> translationStack) {
+    this->translationStack = translationStack;
+}
+
+void FluidicMachineModel::updatePluginFactory(std::shared_ptr<PluginAbstractFactory> factory) {
+    this->graph->updatePluginFactory(factory);
+}
+
 void FluidicMachineModel::addStack2State(const std::deque<short int> & queue, units::Volumetric_Flow rate, MachineState & state)
     throw(std::invalid_argument)
 {
