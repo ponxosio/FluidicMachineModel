@@ -9,7 +9,9 @@
 
 #include "fluidicmachinemodel/fluidicnode/fluidicmachinenode.h"
 
-class ValveNode : public FluidicMachineNode
+#include "fluidicmachinemodel/fluidicmachinemodel_global.h"
+
+class VALVENODE_EXPORT ValveNode : public FluidicMachineNode
 {
 public:
     typedef std::unordered_map<int, std::vector<std::unordered_set<int>>> TruthTable;
@@ -18,9 +20,10 @@ public:
     ValveNode(int idNode, int numPins, const TruthTable & truthTable, std::shared_ptr<Function> valveRouteFunction) throw (std::invalid_argument);
     virtual ~ValveNode();
 
-
     const std::vector<std::unordered_set<int>> & getConnectedPins(int position) throw (std::invalid_argument);
     std::set<int> getValvePossibleValues();
+
+    virtual std::string toText();
 
     inline int getNumOfPositions() {
         return truthTable.size();

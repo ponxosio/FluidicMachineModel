@@ -45,6 +45,12 @@ std::set<int> ValveNode::getValvePossibleValues() {
     return possibleValues;
 }
 
+std::string ValveNode::toText() {
+    std::string name = "V";
+    std::string vuelta = std::to_string(containerID) + "[label=\"" + name + "\"];";
+    return vuelta;
+}
+
 void ValveNode::copyTruthTable(const TruthTable & table) {
     for (auto it = table.begin(); it != table.end(); ++it) {
         int position = it->first;

@@ -7,7 +7,9 @@
 
 #include "fluidicmachinemodel/fluidicnode/fluidicmachinenode.h"
 
-class PumpNode : public FluidicMachineNode
+#include "fluidicmachinemodel/fluidicmachinemodel_global.h"
+
+class PUMPNODE_EXPORT PumpNode : public FluidicMachineNode
 {
 public:
     typedef enum PumpType_ {
@@ -22,6 +24,8 @@ public:
 
     //getters & setters
     PumpType getType();
+
+    virtual std::string toText();
 
     inline virtual Node* clone() const {
         return new PumpNode(*this);

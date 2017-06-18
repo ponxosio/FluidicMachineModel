@@ -39,3 +39,9 @@ const ContainerNode::ContainerType & ContainerNode::getContainerType() const {
 void ContainerNode::setActualVolume(units::Volume volume) {
     actualVolume = volume;
 }
+
+std::string ContainerNode::toText() {
+    std::string name = (containerType == open ? "_OPEN_CONTAINER" : "_CLOSE_CONTAINER");
+    std::string vuelta = std::to_string(containerID) + "[label=\"" + std::to_string(containerID) + name + "\"];";
+    return vuelta;
+}

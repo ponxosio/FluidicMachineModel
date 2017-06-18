@@ -10,7 +10,9 @@
 
 #include "fluidicmachinemodel/fluidicedge/tubeedge.h"
 
-class FluidicMachineNode : public Node, public ComponentInterface
+#include "fluidicmachinemodel/fluidicmachinemodel_global.h"
+
+class FLUIDICMACHINENODE_EXPORT FluidicMachineNode : public Node, public ComponentInterface
 {
 public:
     FluidicMachineNode();

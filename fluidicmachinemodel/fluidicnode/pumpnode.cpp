@@ -25,3 +25,9 @@ PumpNode::PumpType PumpNode::getType() {
     return type;
 }
 
+std::string PumpNode::toText() {
+    std::string name = (type == bidirectional ? "_BIDIRECTIONAL_PUMP" : "_UNIDIRECTIONAL_PUMP");
+    std::string vuelta = std::to_string(containerID) + "[label=\"" + std::to_string(containerID) + name + "\"];";
+    return vuelta;
+}
+

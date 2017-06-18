@@ -28,6 +28,8 @@ public:
 
     const ContainerType & getContainerType() const;
 
+    virtual std::string toText();
+
     inline virtual units::Volume getActualVolume() const {
         return actualVolume;
     }
