@@ -29,14 +29,8 @@ bool FluidicMachineModel::canDoMovement(unsigned long mask) {
     return ((types & mask ) == mask);
 }
 
-std::shared_ptr<MappingInterface> FluidicMachineModel::findProtocolRelation(std::shared_ptr<ProtocolGraph> protocol) throw(std::invalid_argument) {
-    //TODO:
-    return NULL;
-}
-
 std::shared_ptr<ComponentInterface> FluidicMachineModel::getComponent(int virtualContainer) throw(std::invalid_argument) {
-    //TODO:
-    return NULL;
+    return graph->getNode(virtualContainer);
 }
 
 void FluidicMachineModel::loadContainer(int id, units::Volume volume) throw(std::invalid_argument) {

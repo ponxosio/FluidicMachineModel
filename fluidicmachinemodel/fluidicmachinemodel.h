@@ -14,8 +14,9 @@
 #include <commonmodel/modelinterface/modelinterface.h>
 #include <commonmodel/plugininterface/pluginabstractfactory.h>
 #include <protocolGraph/ProtocolGraph.h>
+
 #include <utils/units.h>
-#include <utils/machineflow.h>
+#include "utils/machineflow.h"
 
 #include "fluidicmachinemodel/machinegraph.h"
 #include "fluidicmachinemodel/machine_graph_utils/graphrulesgenerator.h"
@@ -89,23 +90,6 @@ public:
      * @sa ModelInterface
      */
     virtual bool canDoMovement(unsigned long mask);
-    /**
-     * @brief findProtocolRelation try to make a relation between a protocol and this machine.
-     *
-     * findProtocolRelation try to make a relation between a protocol and this machine. If the relation if found an object
-     * is returned that stores and allows to access the relations between the protocol's virtual container names and the
-     * node ids of this machine.
-     *
-     * @param protocol pointer to a protocol
-     * @return a pointer to a mapping object that stores the relation between the virtual containers name of the protocol
-     * and the ids nodes of this machine.
-     *
-     * @exception an invalid_argument exception is thrown if the system can't find a relation between the protocol and
-     * this machine.
-     *
-     * @sa MappingInterface
-     */
-    virtual std::shared_ptr<MappingInterface> findProtocolRelation(std::shared_ptr<ProtocolGraph> protocol) throw(std::invalid_argument);
 
     /**
      * @brief getComponent returns a particular node as a ComponentInterface
