@@ -377,6 +377,13 @@ void MachineGraph::updatePluginFactory(std::shared_ptr<PluginAbstractFactory> fa
     }
 }
 
+void MachineGraph::finishAllOperations() {
+    GraphType::NodeMapPtr nodes = graphPtr->getAllNodes();
+    for (auto pair: *nodes.get()) {
+        pair.second->stopAllOperations();
+    }
+}
+
 const std::vector<std::shared_ptr<MachineGraph>> & MachineGraph::getConnectedComponents() {
     if(!connectedComponentsUpdated) {
         calculateConnectedComponents();

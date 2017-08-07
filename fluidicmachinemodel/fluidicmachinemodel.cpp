@@ -165,6 +165,10 @@ void FluidicMachineModel::processFlows() throw(std::runtime_error) {
     }
 }
 
+void FluidicMachineModel::stopAllOperations() {
+    graph->finishAllOperations();
+}
+
 bool FluidicMachineModel::checkFlows(const MachineFlow::FlowsVector & flows2Set) throw(std::runtime_error) {
     bool possible = false;
     MachineState containers2Set(actualFullMachineState.getRatePrecisionInteger(), actualFullMachineState.getRatePrecisionDecimal());
