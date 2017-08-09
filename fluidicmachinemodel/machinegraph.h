@@ -1,6 +1,7 @@
 #ifndef MACHINEGRAPH_H
 #define MACHINEGRAPH_H
 
+#include <algorithm>
 #include <memory>
 #include <stdexcept>
 #include <unordered_set>
@@ -78,6 +79,8 @@ public:
 
     void finishAllOperations();
 
+    void setValvesAsTwins(const std::unordered_set<int> & valvesIds) throw(std::invalid_argument);
+
     inline bool isContainer(int id) const {
         return (isOpenContainer(id) || isCloseContainer(id));
     }
@@ -126,6 +129,10 @@ public:
         return graphPtr->toString();
     }
 
+    const std::vector<std::unordered_set<int>> & getTwinsValves() const {
+        return twinValves;
+    }
+
 protected:
     std::shared_ptr<GraphType> graphPtr;
     bool connectedComponentsUpdated;
@@ -136,6 +143,8 @@ protected:
     std::unordered_set<int> valvesSet;
     std::unordered_set<int> closeContainersSet;
     std::unordered_set<int> openContainersSet;
+
+    std::vector<std::unordered_set<int>> twinValves;
 
     AutoEnumerate luquidIdserie;
     std::unordered_map<short int, short int> openContainerLiquidIdMap;

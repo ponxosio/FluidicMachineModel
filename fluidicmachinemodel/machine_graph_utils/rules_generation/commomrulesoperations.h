@@ -17,12 +17,14 @@
 class DomainGenerator;
 class GraphRulesGenerator;
 class StatePredicateGenerator;
+class TwinValvesRulesGenerator;
 
 class CommomRulesOperations
 {
     friend class DomainGenerator;
     friend class GraphRulesGenerator;
     friend class ShortStatePredicateGenerator;
+    friend class TwinValvesRulesGenerator;
 
 public:
     virtual ~CommomRulesOperations();
