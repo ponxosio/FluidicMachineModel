@@ -46,7 +46,7 @@ std::set<int> ValveNode::getValvePossibleValues() {
 }
 
 std::string ValveNode::toText() {
-    std::string name = "V";
+    std::string name = "V_" + std::to_string(containerID);
     std::string vuelta = std::to_string(containerID) + "[label=\"" + name + "\"];";
     return vuelta;
 }
