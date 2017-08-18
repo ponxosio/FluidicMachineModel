@@ -201,6 +201,8 @@ public:
      */
     virtual void processFlows() throw(std::runtime_error);
 
+    virtual void stopAllOperations();
+
     bool checkFlows(const MachineFlow::FlowsVector & flows2Set) throw(std::runtime_error);
 
     /**

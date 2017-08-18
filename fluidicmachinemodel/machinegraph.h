@@ -76,6 +76,8 @@ public:
 
     void updatePluginFactory(std::shared_ptr<PluginAbstractFactory> factory);
 
+    void finishAllOperations();
+
     inline bool isContainer(int id) const {
         return (isOpenContainer(id) || isCloseContainer(id));
     }
