@@ -384,6 +384,21 @@ void MachineGraph::finishAllOperations() {
     }
 }
 
+void MachineGraph::setValvesAsTwins(const std::unordered_set<int> & valvesIds) throw(std::invalid_argument) {
+    if (find(twinValves.begin(), twinValves.end(), valvesIds) == twinValves.end()) {
+        bool correct = true;
+        for(auto it = valvesIds.begin(); correct && it != valvesIds.end(); ++it) {
+            correct = (valvesSet.find(*it) != valvesSet.end());
+        }
+
+        if (correct) {
+            twinValves.push_back(valvesIds);
+        } else {
+            throw(std::invalid_argument("MachineGraph::setValvesAsTwins() has received an id thta is not a valve"));
+        }
+    }
+}
+
 const std::vector<std::shared_ptr<MachineGraph>> & MachineGraph::getConnectedComponents() {
     if(!connectedComponentsUpdated) {
         calculateConnectedComponents();

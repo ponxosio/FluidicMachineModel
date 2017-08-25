@@ -90,7 +90,8 @@ HEADERS += \
     fluidicmachinemodel/rules/variabledomain.h \
     fluidicmachinemodel/fluidicmachinemodel.h \
     fluidicmachinemodel/fluidicmachinemodel_global.h \
-    fluidicmachinemodel/machinegraph.h
+    fluidicmachinemodel/machinegraph.h \
+    fluidicmachinemodel/machine_graph_utils/rules_generation/twinvalvesrulesgenerator.h
 
 SOURCES += \
     fluidicmachinemodel/fluidicedge/tubeedge.cpp \
@@ -115,4 +116,5 @@ SOURCES += \
     fluidicmachinemodel/rules/equality.cpp \
     fluidicmachinemodel/rules/variabledomain.cpp \
     fluidicmachinemodel/fluidicmachinemodel.cpp \
-    fluidicmachinemodel/machinegraph.cpp
+    fluidicmachinemodel/machinegraph.cpp \
+    fluidicmachinemodel/machine_graph_utils/rules_generation/twinvalvesrulesgenerator.cpp
