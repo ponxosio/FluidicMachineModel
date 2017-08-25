@@ -868,7 +868,7 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::makeNodeTubesCombinatio
             subtractTubesWithoutLabel(leavingMap, Label::bigger, leavingNonZero, tempLeavingDummy);
 
             if (!leavingNonZero.empty() &&
-                (leavingNonZero.size() + tempLeavingDummy.size() > 1))
+                (leavingNonZero.size() + tempLeavingDummy.size() >= 1))
             {
                 LabelTypeTubeMap labelsNonZeroLeaving = getSubMap(leavingMap, leavingNonZero);
                 std::shared_ptr<Predicate> combinationPredicates =
