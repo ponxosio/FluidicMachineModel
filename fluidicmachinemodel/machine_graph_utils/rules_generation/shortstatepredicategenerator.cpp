@@ -692,6 +692,13 @@ std::shared_ptr<Predicate> ShortStatePredicateGenerator::generatePredicateValve(
         std::shared_ptr<Predicate> tubesConnectedpredicates =
                 generatePredicateValve_processConnectedPins(valveId, possition, valvePtr, arrivingMap, leavingMap);
 
+        if (tubesConnectedpredicates != NULL) {
+            std::shared_ptr<Predicate> allowTubesZero = allTubesSameEquality(*arriving, Equality::equal, calculator->getNumber(0));
+            allowTubesZero = calculator->andPredicates(allowTubesZero, allTubesSameEquality(*leaving, Equality::equal, calculator->getNumber(0)));
+
+            tubesConnectedpredicates = calculator->orPredicates(allowTubesZero, tubesConnectedpredicates);
+        }
+
         MachineGraph::GraphType::EdgeVector aTubesZero;
         MachineGraph::GraphType::EdgeVector lTubesZero;
 

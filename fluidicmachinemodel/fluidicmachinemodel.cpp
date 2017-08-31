@@ -138,7 +138,7 @@ void FluidicMachineModel::stopContinuousFlow(const std::vector<int> & containers
     }
 }
 
-void FluidicMachineModel::processFlows() throw(std::runtime_error) {
+void FluidicMachineModel::processFlows(const std::vector<int> & containers) throw(std::runtime_error) {
     MachineState containers2Set(actualFullMachineState.getRatePrecisionInteger(), actualFullMachineState.getRatePrecisionDecimal());
     MachineFlow::FlowsVector flows2Set = flowEngine.updateFlows();
 
@@ -147,6 +147,7 @@ void FluidicMachineModel::processFlows() throw(std::runtime_error) {
             addStack2State(std::get<0>(tuple), std::get<1>(tuple), containers2Set);
         }
         setUnabledPumps(containers2Set);
+        setUnusedContainersToZero(containers, containers2Set);
 
         if (!routingEngine) {
             routingEngine = translateRules();
@@ -169,7 +170,11 @@ void FluidicMachineModel::stopAllOperations() {
     graph->finishAllOperations();
 }
 
-bool FluidicMachineModel::checkFlows(const MachineFlow::FlowsVector & flows2Set) throw(std::runtime_error) {
+bool FluidicMachineModel::checkFlows(
+        const std::vector<int> & containers,
+        const MachineFlow::FlowsVector & flows2Set)
+    throw(std::runtime_error)
+{
     bool possible = false;
     MachineState containers2Set(actualFullMachineState.getRatePrecisionInteger(), actualFullMachineState.getRatePrecisionDecimal());
 
@@ -178,6 +183,7 @@ bool FluidicMachineModel::checkFlows(const MachineFlow::FlowsVector & flows2Set)
             addStack2State(std::get<0>(tuple), std::get<1>(tuple), containers2Set);
         }
         setUnabledPumps(containers2Set);
+        setUnusedContainersToZero(containers, containers2Set);
 
         if (!routingEngine) {
             routingEngine = translateRules();
@@ -257,6 +263,14 @@ void FluidicMachineModel::addStack2State(const std::deque<short int> & queue, un
          machineState.overridePumpDirState(pumpId, 0);
          machineState.overridePumpRateState(pumpId, 0);
      }
+ }
+
+ void FluidicMachineModel::setUnusedContainersToZero(const std::vector<int> & containers, MachineState & state) {
+    for (int id : containers) {
+        if (!state.isContainerPresent(id)) {
+            state.emplaceContainerVar(id);
+        }
+    }
  }
 
 std::shared_ptr<FluidicMachineNode> FluidicMachineModel::getNode(int id) throw(std::invalid_argument) {

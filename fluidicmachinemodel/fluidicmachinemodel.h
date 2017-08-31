@@ -199,11 +199,12 @@ public:
      *
      * @sa RoutingEngine, rules
      */
-    virtual void processFlows() throw(std::runtime_error);
+    virtual void processFlows(const std::vector<int> & containers) throw(std::runtime_error);
 
     virtual void stopAllOperations();
 
-    bool checkFlows(const MachineFlow::FlowsVector & flows2Set) throw(std::runtime_error);
+    bool checkFlows(const std::vector<int> & containers,
+                    const MachineFlow::FlowsVector & flows2Set) throw(std::runtime_error);
 
     /**
      * @brief setTranslationStack sets the TransaltionStack of the system, this is the object that interfaces with the constraints engine.
@@ -413,6 +414,8 @@ protected:
     void sendActualState2components() throw(std::runtime_error);
 
     void setUnabledPumps(MachineState & machineState);
+
+    void setUnusedContainersToZero(const std::vector<int> & containers, MachineState & state);
 };
 
 #endif // FLUIDICMACHINEMODEL_H
