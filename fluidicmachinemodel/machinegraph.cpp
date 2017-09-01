@@ -378,10 +378,21 @@ void MachineGraph::updatePluginFactory(std::shared_ptr<PluginAbstractFactory> fa
 }
 
 void MachineGraph::finishAllOperations() {
-    GraphType::NodeMapPtr nodes = graphPtr->getAllNodes();
-    for (auto pair: *nodes.get()) {
-        pair.second->stopAllOperations();
+    for(int ccId : closeContainersSet) {
+        this->getContainer(ccId)->stopAllOperations();
     }
+
+    for(int ocId : openContainersSet) {
+        this->getContainer(ocId)->stopAllOperations();
+    }
+
+    for(int pumpId : pumpsSet) {
+       this->getPump(pumpId)->stopAllOperations();
+   }
+
+    for(int valveId : valvesSet) {
+       this->getValve(valveId)->stopAllOperations();
+   }
 }
 
 void MachineGraph::setValvesAsTwins(const std::unordered_set<int> & valvesIds) throw(std::invalid_argument) {

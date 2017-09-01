@@ -32,6 +32,7 @@ public:
     std::unordered_map<std::string, long long> getAllContainersTubes();
     void setAllStates(const std::unordered_map<std::string, long long> & states) throw (std::invalid_argument);
 
+    bool isContainerPresent(int id);
     void emplaceContainerVar(int id);
     long long getContainerState(int id) throw(std::invalid_argument);
     void overrideContainerState(int id, long long state) throw(std::invalid_argument);

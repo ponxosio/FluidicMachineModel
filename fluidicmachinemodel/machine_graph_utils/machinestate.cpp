@@ -89,6 +89,11 @@ void MachineState::emplaceContainerVar(int id) {
     }
 }
 
+bool MachineState::isContainerPresent(int id) {
+    std::string varName = VariableNominator::getContainerVarName(id);
+    return containersMap.find(varName) != containersMap.end();
+}
+
 long long MachineState::getContainerState(int id) throw(std::invalid_argument) {   
     std::string varName = VariableNominator::getContainerVarName(id);
     auto it = containersMap.find(varName);
