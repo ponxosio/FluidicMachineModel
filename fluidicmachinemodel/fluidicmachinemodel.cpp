@@ -239,16 +239,20 @@ void FluidicMachineModel::addStack2State(const std::deque<short int> & queue, un
     }
 }
 
- void FluidicMachineModel::sendActualState2components() throw(std::runtime_error) {
-     for (const auto tuple: actualFullMachineState.getAllPumpsDirVar()) {
+void FluidicMachineModel::sendActualState2components() throw(std::runtime_error) {
+    //first stop pumps
+    for (const auto tuple: actualFullMachineState.getAllPumpsDirVar()) {
         int id = VariableNominator::getPumpId(tuple.first);
         int dir = tuple.second;
         double rate = (double)actualFullMachineState.getPumpRate(id);
 
-        std::shared_ptr<FluidicMachineNode> graphNode = graph->getNode(id);
-        graphNode->doOperation(Function::pump, 2, dir, rate*defaultRateUnits);
+        if (rate == 0) {
+            std::shared_ptr<FluidicMachineNode> graphNode = graph->getNode(id);
+            graphNode->doOperation(Function::pump, 2, dir, rate*defaultRateUnits);
+        }
     }
 
+    //second move valves
     for (auto tuple: actualFullMachineState.getAllValves()) {
         int id = VariableNominator::getValveId(tuple.first);
         int pos = tuple.second;
@@ -256,7 +260,19 @@ void FluidicMachineModel::addStack2State(const std::deque<short int> & queue, un
         std::shared_ptr<FluidicMachineNode> graphNode = graph->getNode(id);
         graphNode->doOperation(Function::route, 1, pos);
     }
- }
+
+    //lastly start pumps
+    for (const auto tuple: actualFullMachineState.getAllPumpsDirVar()) {
+        int id = VariableNominator::getPumpId(tuple.first);
+        int dir = tuple.second;
+        double rate = (double)actualFullMachineState.getPumpRate(id);
+
+        if (rate != 0) {
+            std::shared_ptr<FluidicMachineNode> graphNode = graph->getNode(id);
+            graphNode->doOperation(Function::pump, 2, dir, rate*defaultRateUnits);
+        }
+    }
+}
 
  void FluidicMachineModel::setUnabledPumps(MachineState & machineState) {
      for(int pumpId : disabledPumps) {
