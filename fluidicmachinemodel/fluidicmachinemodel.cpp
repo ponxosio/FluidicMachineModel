@@ -220,8 +220,9 @@ void FluidicMachineModel::addStack2State(const std::deque<short int> & queue, un
                 units::Volumetric_Flow convertedFlow = rate.to(defaultRateUnits);
                 long long stateValue = state.generateState(1 << id, convertedFlow());
 
-                state.emplaceContainerVar(id);
-                state.overrideContainerState(id, -stateValue);
+                short int containerId = it_start->first;
+                state.emplaceContainerVar(containerId);
+                state.overrideContainerState(containerId, -stateValue);
 
                 for (auto it = queue.begin() + 1; it != queue.end(); ++it) {
                     state.emplaceContainerVar(*it);
